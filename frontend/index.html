@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>bChan</title>
+        <link rel="icon" type="image/png" href="assets/favicon-96x96.png" sizes="96x96" />
+        <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+        <link rel="shortcut icon" href="assets/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+        <link rel="manifest" href="assets/site.webmanifest" />
+        <style>
+            @font-face {
+                font-family: main;
+                src: url(assets/space-grotesk.woff2);
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                background-color: #161b22;
+            }
+            p,
+            h1,
+            h2 {
+                margin: 0;
+            }
+            h2 {
+                font-size: 16px;
+            }
+            body {
+                font-family: main, -system-ui, sans-serif;
+                margin: 0 auto;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: #e0e0e0;
+                width: 100%;
+                max-width: 100%;
+            }
+            #root {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 16px;
+                width: 100%;
+                padding: 16px;
+            }
+            section {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                border-radius: 4px;
+                box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+                background-color: #20262d;
+                overflow: hidden;
+            }
+            .section-title {
+                padding: 16px;
+            }
+            .section-body {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                padding: 8px;
+                background-color: #30363d;
+            }
+            .settings-page {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+            .settings-page h2 {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+            .vertical-center {
+                justify-content: center;
+                align-items: center;
+            }
+            textarea,
+            input,
+            select,
+            button {
+                font-family: main;
+            }
+            textarea,
+            input,
+            select {
+                background-color: #ffffff22;
+                color: #fff;
+            }
+            textarea,
+            input,
+            select {
+                width: 100%;
+                padding: 8px;
+                border: 0;
+                border-radius: 4px;
+            }
+            .borderless {
+                border: none;
+            }
+            button {
+                height: 40px;
+                padding-left: 16px;
+                padding-right: 16px;
+                border: 0;
+                border-radius: 4px;
+                background-color: #ff7a00;
+                color: #fff;
+            }
+            .button-secondary {
+                background-color: transparent;
+                border: 1px solid #ff7a00;
+                height: 40px;
+                color: #fff;
+                padding-left: 16px;
+                padding-right: 16px;
+                border-radius: 4px;
+                text-decoration: none;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+            }
+            button:hover,
+            .button-secondary:hover {
+                background-color: #6c6c6c;
+                cursor: pointer;
+            }
+            .post {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                background-color: #30363d;
+                padding: 8px;
+                border-radius: 4px;
+                overflow-wrap: break-word;
+            }
+            img {
+                max-width: 200px;
+                max-height: 200px;
+                cursor: pointer;
+            }
+
+            .avatar {
+                flex-shrink: 0;
+            }
+            p {
+                word-break: break-word;
+                hyphens: auto;
+            }
+            .proof-button {
+                font-size: 12px;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+            .proof {
+                font-size: 12px;
+            }
+            .thread-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 8px;
+            }
+            .thread {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                padding: 8px;
+                border-radius: 4px;
+                background-color: #ffffff11;
+                align-items: center;
+            }
+            .thread-info {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                width: 100%;
+                justify-content: center;
+            }
+            .post-count {
+                font-size: 12px;
+                color: #ff7a00;
+                background-color: rgba(255, 122, 0, 0.1);
+                padding: 2px 6px;
+                border-radius: 10px;
+                white-space: nowrap;
+            }
+            .thread-subtitle {
+                font-size: 12px;
+                color: #e0e0e0;
+            }
+            .input-group {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                width: 100%;
+            }
+            label {
+                margin-left: 4px;
+                font-size: 14px;
+                color: #e0e0e0;
+            }
+            .greentext {
+                color: #789922;
+            }
+            .navigation-header {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 16px;
+                background-color: #20262d;
+                border-radius: 4px;
+            }
+            .main-action-button {
+                height: 36px;
+                margin-left: 16px;
+                white-space: nowrap;
+            }
+            .navigation-header .nav-buttons {
+                display: flex;
+                gap: 8px;
+            }
+            .welcome-header {
+                text-align: center;
+            }
+            .welcome-header h1 {
+                color: #ff7a00;
+            }
+            .error-message {
+                color: #ff4545;
+                font-size: 14px;
+                padding: 4px;
+            }
+            .timestamp {
+                font-size: 12px;
+                color: #aaaaaa;
+                word-break: normal;
+            }
+            .connection-status {
+                margin-left: 8px;
+                padding: 2px 8px;
+                border-radius: 10px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            .connection-status.connected {
+                background-color: #2ecc71;
+                color: #fff;
+            }
+            .connection-status.disconnected {
+                background-color: #e74c3c;
+                color: #fff;
+            }
+            .connection-status.checking {
+                background-color: #f39c12;
+                color: #fff;
+            }
+            .not-found-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 32px 16px;
+                text-align: center;
+            }
+            .not-found-container h2 {
+                color: #ff7a00;
+                margin-bottom: 16px;
+                font-size: 24px;
+            }
+            .not-found-container p {
+                margin-bottom: 24px;
+                max-width: 500px;
+            }
+            .not-found-actions {
+                display: flex;
+                gap: 16px;
+                margin-top: 16px;
+            }
+            /* Navbar Styles */
+            .navbar {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 16px;
+                background-color: #20262d;
+                border-radius: 4px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .navbar-brand {
+                display: flex;
+                align-items: center;
+            }
+            .navbar-logo {
+                font-size: 20px;
+                font-weight: bold;
+                color: #ff7a00;
+                text-decoration: none;
+            }
+            .navbar-menu {
+                display: flex;
+                gap: 16px;
+            }
+            .navbar-item {
+                color: #e0e0e0;
+                text-decoration: none;
+                font-size: 14px;
+            }
+            .navbar-item:hover {
+                color: #ff7a00;
+            }
+            .navbar-button {
+                background-color: transparent;
+                border: 1px solid #ff7a00;
+                color: #fff;
+                padding: 4px 12px;
+                border-radius: 4px;
+                font-size: 14px;
+                cursor: pointer;
+            }
+            .navbar-button:hover {
+                background-color: #30363d;
+            }
+            .navbar-identity {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 4px;
+                transition: background-color 0.2s;
+            }
+            .navbar-identity:hover {
+                background-color: #30363d;
+            }
+            .navbar-identity-text {
+                font-size: 14px;
+                color: #e0e0e0;
+            }
+            .main-layout {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+            .main-content {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script type="module" src="src/index.tsx"></script>
+    </body>
+</html>

@@ -1,0 +1,20 @@
+{
+    "name": "bchan-aggregator",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "check": "tsc --noEmit"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@ethersphere/bee-js": "^9.3.0",
+        "cafe-utility": "^27.12.1"
+    },
+    "devDependencies": {
+        "@types/node": "^22.13.1",
+        "typescript": "^5.8.3"
+    },
+    "description": ""
+}
