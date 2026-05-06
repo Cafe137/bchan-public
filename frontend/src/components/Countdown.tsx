@@ -17,8 +17,8 @@ export function Countdown({ target, prefix }: Props) {
     }, [target])
 
     return (
-        <p>
-            {prefix} {Math.ceil(timeLeft / 1000)} seconds
+        <p className="countdown">
+            {prefix} {Math.ceil(timeLeft / 1000)}s
         </p>
     )
 }

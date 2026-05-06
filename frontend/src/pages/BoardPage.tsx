@@ -39,7 +39,7 @@ export function BoardPage() {
                 try {
                     const feedReader = bee.makeFeedReader(
                         Topic.fromString(getBoardIdentifierWord()),
-                        '0efedd966cf6e4d5efce094e299c92a7af6fb10d'
+                        'bc322a23377d4f71e7aa41d303b2391cb28c937c'
                     )
                     const result = await feedReader.downloadPayload()
                     setThreads(Binary.partition(result.payload.toUint8Array(), 32).map(x => new Reference(x)))
@@ -129,7 +129,7 @@ export function BoardPage() {
                         <p>No threads found. Be the first to create one!</p>
                     )
                 ) : (
-                    <Spinner depth={0} />
+                    <Spinner />
                 )}
             </div>
             <Countdown target={nextRefreshAt} prefix="Refreshing in" />

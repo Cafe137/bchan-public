@@ -1,0 +1,8 @@
+-   This project is called "bchan", and it is hosted at https://beechan.eth.limo
+-   This is the frontend counterpart of the project
+-   It is a message board, built for Ethereum Swarm (the decentralized storage) as a DApp (decentralized application)
+-   User identities are stored in browser localStorage
+-   The two main concepts are threads and posts
+-   The main page is called a "board", which is the grid of threads, and each thread is a list of posts
+-   Posts may have text, or an image, or both
+-   There are cryptographic proofs that threads are authentic and that posts are authentic (e.g. their proof must refer to the previous thread or post)

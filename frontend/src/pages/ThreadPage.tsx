@@ -81,7 +81,7 @@ export function ThreadPage() {
 
                 const feedReader = bee.makeFeedReader(
                     Topic.fromString(getThreadIdentiferWord(threadData.reference)),
-                    '0efedd966cf6e4d5efce094e299c92a7af6fb10d'
+                    'bc322a23377d4f71e7aa41d303b2391cb28c937c'
                 )
                 const result = await feedReader.downloadPayload()
                 setPosts(
@@ -153,14 +153,14 @@ export function ThreadPage() {
     if (!threadData) {
         return (
             <MainLayout title="Loading Thread...">
-                <Spinner depth={1} />
+                <Spinner />
             </MainLayout>
         )
     }
 
     return (
         <MainLayout
-            title="Viewing Thread"
+            title={threadData.title}
             mainAction={{
                 label: showPostForm ? 'Hide' : 'Post Reply',
                 onClick: () => {
@@ -237,7 +237,7 @@ export function ThreadPage() {
                     </div>
                 </Section>
             )}
-            <Section title={threadData.title}>
+            <Section title="Original Post">
                 <p>{threadData.body}</p>
             </Section>
 
@@ -245,7 +245,7 @@ export function ThreadPage() {
             {posts && bee ? (
                 posts.map(post => <Post key={post.toHex()} bee={bee} reference={post} />)
             ) : (
-                <Spinner depth={1} />
+                <Spinner />
             )}
             <Countdown target={nextRefreshAt} prefix="Refreshing in" />
         </MainLayout>

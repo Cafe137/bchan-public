@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
 import { Horizontal } from './Horizontal'
 import { Spinner } from './Spinner'
+import { createPortal } from 'react-dom'
 
 interface Props {
     bee: Bee
@@ -21,6 +22,7 @@ export function Post({ bee, reference }: Props) {
     const [timestamp, setTimestamp] = useState<BigInt | null>(null)
     const [text, setText] = useState<string | null>(null)
     const [image, setImage] = useState<string | null>(null)
+    const [lightboxOpen, setLightboxOpen] = useState(false)
 
     useEffect(() => {
         async function initialize() {
@@ -45,8 +47,17 @@ export function Post({ bee, reference }: Props) {
         initialize()
     }, [reference])
 
+    useEffect(() => {
+        if (!lightboxOpen) return
+        function onKeyDown(e: KeyboardEvent) {
+            if (e.key === 'Escape') setLightboxOpen(false)
+        }
+        window.addEventListener('keydown', onKeyDown)
+        return () => window.removeEventListener('keydown', onKeyDown)
+    }, [lightboxOpen])
+
     if (!owner) {
-        return <Spinner depth={1} />
+        return <Spinner />
     }
 
     const avatar = createAvatar(identicon, {
@@ -54,10 +65,8 @@ export function Post({ bee, reference }: Props) {
     })
 
     function onImageClick() {
-        if (!image) {
-            return
-        }
-        window.open(image, '_blank')
+        if (!image) return
+        setLightboxOpen(true)
     }
 
     function showProof() {
@@ -141,9 +150,15 @@ export function Post({ bee, reference }: Props) {
                                 {line}
                             </p>
                         ))}
-                    {image && <img onClick={onImageClick} src={image} />}
+                    {image && <img onClick={onImageClick} src={image} style={{ cursor: 'zoom-in' }} />}
                 </div>
             </Horizontal>
+            {lightboxOpen && image && createPortal(
+                <div className="lightbox" onClick={() => setLightboxOpen(false)}>
+                    <img src={image} alt="" onClick={e => e.stopPropagation()} />
+                </div>,
+                document.body
+            )}
         </div>
     )
 }

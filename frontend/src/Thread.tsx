@@ -103,7 +103,7 @@ export function Thread({ bee, reference }: Props) {
             try {
                 const feedReader = bee.makeFeedReader(
                     Topic.fromString(getThreadIdentiferWord(reference.toHex())),
-                    '0efedd966cf6e4d5efce094e299c92a7af6fb10d'
+                    'bc322a23377d4f71e7aa41d303b2391cb28c937c'
                 )
                 const result = await feedReader.downloadPayload()
                 const posts = Binary.partition(result.payload.toUint8Array(), 32)
@@ -184,39 +184,33 @@ export function Thread({ bee, reference }: Props) {
     }
 
     if (!payload) {
-        return <Spinner depth={0} />
+        return <Spinner />
     }
 
     return (
-        <div className="thread" style={activityStyle.borderStyle}>
+        <div className="thread" style={activityStyle.borderStyle} onClick={onOpen}>
             <h2>{payload.title}</h2>
-            <p className="thread-subtitle">{payload.body.slice(0, 68)}</p>
+            <p className="thread-subtitle">{payload.body.slice(0, 120)}</p>
             <div className="thread-info">
                 <span className="post-count">
-                    {postCount !== null ? `${postCount} post${postCount !== 1 ? 's' : ''}` : 'Loading...'}
+                    {postCount !== null ? `${postCount} post${postCount !== 1 ? 's' : ''}` : '...'}
                 </span>
-                <button className="button-secondary" onClick={onOpen}>
-                    Open
-                </button>
-                <p className="proof-button" onClick={showProof}>
+                {lastPostTime && (
+                    <span className="timestamp" title={`Last post ${Dates.getTimeDelta(lastPostTime).toLowerCase()} ago`}>
+                        {`${Dates.getTimeDelta(lastPostTime).toLowerCase()} ago`}
+                    </span>
+                )}
+                <p
+                    className="proof-button"
+                    style={{ marginLeft: 'auto' }}
+                    onClick={e => {
+                        e.stopPropagation()
+                        showProof()
+                    }}
+                >
                     Proof
                 </p>
             </div>
-            {lastPostTime && (
-                <div
-                    className="timestamp"
-                    style={{
-                        fontSize: '11px',
-                        marginTop: '4px',
-                        textAlign: 'center',
-                        width: '100%',
-                        color: '#aaaaaa'
-                    }}
-                    title={`Last post ${Dates.getTimeDelta(lastPostTime).toLowerCase()} ago`}
-                >
-                    {`Last post ${Dates.getTimeDelta(lastPostTime).toLowerCase()} ago`}
-                </div>
-            )}
         </div>
     )
 }
