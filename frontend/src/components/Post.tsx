@@ -3,8 +3,8 @@ import { createAvatar } from '@dicebear/core'
 import { Bee, EthAddress, Reference } from '@ethersphere/bee-js'
 import { Binary, Types, Uint8ArrayReader } from 'cafe-utility'
 import { useEffect, useState } from 'react'
-import Swal from 'sweetalert2'
 import { Horizontal } from './Horizontal'
+import { Modal, ProofRow } from './Modal'
 import { Spinner } from './Spinner'
 import { createPortal } from 'react-dom'
 
@@ -23,6 +23,7 @@ export function Post({ bee, reference }: Props) {
     const [text, setText] = useState<string | null>(null)
     const [image, setImage] = useState<string | null>(null)
     const [lightboxOpen, setLightboxOpen] = useState(false)
+    const [showProofModal, setShowProofModal] = useState(false)
 
     useEffect(() => {
         async function initialize() {
@@ -70,29 +71,23 @@ export function Post({ bee, reference }: Props) {
     }
 
     function showProof() {
-        if (!owner) {
-            return
-        }
-        Swal.fire({
-            title: 'Proof',
-            html: `<p><strong>Signature</strong></p>
-<p>${signature}</p>
-<p><strong>Owner</strong></p>
-<p>${owner.toHex()}</p>
-<p><strong>Previous</strong></p>
-<p>${previous}</p>
-<p><strong>Thread</strong></p>
-<p>${thread}</p>
-<p><strong>Timestamp</strong></p>
-<p>${timestamp}</p>
-<p><strong>Reference</strong></p>
-<p>${reference.toHex()}</p>
-<p><strong>Digest</strong></p>
-<p>${digest}</p>`
-        })
+        if (!owner) return
+        setShowProofModal(true)
     }
 
     return (
+        <>
+        {showProofModal && owner && (
+            <Modal title="Proof" onClose={() => setShowProofModal(false)}>
+                <ProofRow label="Signature" value={signature ?? ''} />
+                <ProofRow label="Owner" value={owner.toHex()} />
+                <ProofRow label="Previous" value={previous ?? ''} />
+                <ProofRow label="Thread" value={thread ?? ''} />
+                <ProofRow label="Timestamp" value={String(timestamp)} />
+                <ProofRow label="Reference" value={reference.toHex()} />
+                <ProofRow label="Digest" value={digest ?? ''} />
+            </Modal>
+        )}
         <div className="post">
             <Horizontal top>
                 <div style={{ flexShrink: 0 }}>
@@ -160,5 +155,6 @@ export function Post({ bee, reference }: Props) {
                 document.body
             )}
         </div>
+        </>
     )
 }

@@ -309,6 +309,84 @@
                 text-align: center;
                 padding: 4px 0;
             }
+            .modal-overlay {
+                position: fixed;
+                inset: 0;
+                background-color: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                padding: 16px;
+            }
+            .modal {
+                background-color: #20262d;
+                border: 1px solid #30363d;
+                border-radius: 8px;
+                width: 100%;
+                max-width: 560px;
+                max-height: 80vh;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+            }
+            .modal-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 16px;
+                border-bottom: 1px solid #30363d;
+                position: sticky;
+                top: 0;
+                background-color: #20262d;
+            }
+            .modal-header h2 {
+                font-size: 15px;
+                color: #e6edf3;
+            }
+            .modal-close {
+                background: none;
+                border: none;
+                color: #8b949e;
+                font-size: 16px;
+                height: auto;
+                padding: 2px 6px;
+                align-self: auto;
+                line-height: 1;
+                transition: color 0.15s;
+            }
+            .modal-close:hover {
+                background: none;
+                color: #e0e0e0;
+            }
+            .modal-body {
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .proof-row {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+            .proof-label {
+                font-size: 11px;
+                font-weight: 600;
+                color: #8b949e;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+            }
+            .proof-value {
+                font-size: 12px;
+                font-family: monospace;
+                color: #e6edf3;
+                word-break: break-all;
+                background-color: #161b22;
+                padding: 6px 8px;
+                border-radius: 4px;
+                border: 1px solid #21262d;
+            }
             .lightbox {
                 position: fixed;
                 inset: 0;

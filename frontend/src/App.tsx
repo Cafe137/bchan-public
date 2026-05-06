@@ -1,7 +1,6 @@
 import { Bee } from '@ethersphere/bee-js'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { HashRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
-import Swal from 'sweetalert2'
 import { BatchIDProvider } from './BatchContext'
 import { IdentityProvider } from './IdentityContext'
 import { DEFAULT_BEE_URL } from './components/BeeNodeSettings'
@@ -91,14 +90,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
         checkConnection().then(isConnected => {
             if (!isConnected) {
-                Swal.fire({
-                    title: 'Connection Issue',
-                    text: 'There seems to be an issue with your Bee node connection. Please check your settings.',
-                    icon: 'warning',
-                    confirmButtonText: 'Go to Settings'
-                }).then(() => {
-                    navigate('/settings')
-                })
+                navigate('/settings')
             }
         })
     }, [bee, navigate])

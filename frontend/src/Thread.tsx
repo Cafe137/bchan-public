@@ -2,7 +2,7 @@ import { Bee, EthAddress, NULL_ADDRESS, Reference, Topic } from '@ethersphere/be
 import { Binary, Dates, Types, Uint8ArrayReader } from 'cafe-utility'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Swal from 'sweetalert2'
+import { Modal, ProofRow } from './components/Modal'
 import { Spinner } from './components/Spinner'
 import { getThreadIdentiferWord } from './Consensus'
 
@@ -29,6 +29,7 @@ export function Thread({ bee, reference }: Props) {
     const [owner, setOwner] = useState<EthAddress | null>(null)
     const [postCount, setPostCount] = useState<number | null>(null)
     const [lastPostTime, setLastPostTime] = useState<number | null>(null)
+    const [showProofModal, setShowProofModal] = useState(false)
 
     // Always define useMemo for activity styling, even if not used yet
     const activityStyle = useMemo(() => {
@@ -165,22 +166,8 @@ export function Thread({ bee, reference }: Props) {
     }
 
     function showProof() {
-        if (!owner) {
-            return
-        }
-        Swal.fire({
-            title: 'Proof',
-            html: `<p><strong>Signature</strong></p>
-<p>${signature}</p>
-<p><strong>Owner</strong></p>
-<p>${owner.toHex()}</p>
-<p><strong>Previous</strong></p>
-<p>${previous}</p>
-<p><strong>Reference</strong></p>
-<p>${reference.toHex()}</p>
-<p><strong>Digest</strong></p>
-<p>${digest}</p>`
-        })
+        if (!owner) return
+        setShowProofModal(true)
     }
 
     if (!payload) {
@@ -188,6 +175,16 @@ export function Thread({ bee, reference }: Props) {
     }
 
     return (
+        <>
+        {showProofModal && owner && (
+            <Modal title="Proof" onClose={() => setShowProofModal(false)}>
+                <ProofRow label="Signature" value={signature ?? ''} />
+                <ProofRow label="Owner" value={owner.toHex()} />
+                <ProofRow label="Previous" value={previous ?? ''} />
+                <ProofRow label="Reference" value={reference.toHex()} />
+                <ProofRow label="Digest" value={digest ?? ''} />
+            </Modal>
+        )}
         <div className="thread" style={activityStyle.borderStyle} onClick={onOpen}>
             <h2>{payload.title}</h2>
             <p className="thread-subtitle">{payload.body.slice(0, 120)}</p>
@@ -212,5 +209,6 @@ export function Thread({ bee, reference }: Props) {
                 </p>
             </div>
         </div>
+        </>
     )
 }
