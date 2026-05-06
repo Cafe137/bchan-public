@@ -157,11 +157,7 @@ export function Thread({ bee, reference }: Props) {
     }, [bee, reference])
 
     function onOpen() {
-        if (!payload) {
-            alert('Thread has not been loaded yet')
-            return
-        }
-
+        if (!payload) return
         navigate(`/thread/${payload.reference}`)
     }
 

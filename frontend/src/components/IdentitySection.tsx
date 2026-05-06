@@ -3,6 +3,7 @@ import { createAvatar } from '@dicebear/core'
 import { PrivateKey } from '@ethersphere/bee-js'
 import { useMemo } from 'react'
 import { getIdentityFromStorage, useIdentity } from '../IdentityContext'
+import { useToast } from '../ToastContext'
 import { Horizontal } from './Horizontal'
 import { Section } from './Section'
 
@@ -17,6 +18,7 @@ export function getIdentity(): PrivateKey {
 
 export function IdentitySection() {
     const { identity, importIdentity, regenerateIdentity } = useIdentity()
+    const { showToast } = useToast()
 
     const address = useMemo(() => {
         return identity ? identity.publicKey().address().toHex() : ''
@@ -29,9 +31,10 @@ export function IdentitySection() {
         })
     }, [address])
 
-    function onExport() {
+    async function onExport() {
         if (identity) {
-            alert(identity.toHex())
+            await navigator.clipboard.writeText(identity.toHex())
+            showToast('Private key copied to clipboard', 'success')
         }
     }
 

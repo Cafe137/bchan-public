@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { HashRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { BatchIDProvider } from './BatchContext'
 import { IdentityProvider } from './IdentityContext'
+import { ToastProvider } from './ToastContext'
 import { DEFAULT_BEE_URL } from './components/BeeNodeSettings'
 import { BoardPage } from './pages/BoardPage'
 import { NotFoundPage } from './pages/NotFoundPage'
@@ -102,6 +103,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 export function App() {
     return (
+        <ToastProvider>
         <HashRouter>
             <BeeProvider>
                 <BatchIDProvider>
@@ -139,5 +141,6 @@ export function App() {
                 </BatchIDProvider>
             </BeeProvider>
         </HashRouter>
+        </ToastProvider>
     )
 }

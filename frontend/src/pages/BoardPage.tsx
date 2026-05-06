@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useBee } from '../App'
 import { useBatchId } from '../BatchContext'
+import { useToast } from '../ToastContext'
 import { getBoardIdentifierWord } from '../Consensus'
 import { Thread } from '../Thread'
 import { Countdown } from '../components/Countdown'
@@ -16,6 +17,7 @@ import { publishThread } from '../service/Publisher'
 export function BoardPage() {
     const { bee } = useBee()
     const { postBatchId } = useBatchId()
+    const { showToast } = useToast()
     const navigate = useNavigate()
     const location = useLocation()
     const [nextRefreshAt, setNextRefreshAt] = useState<Date>(new Date(Date.now() + Dates.seconds(10)))
@@ -60,25 +62,25 @@ export function BoardPage() {
 
     async function handleSubmit() {
         if (!threads) {
-            alert('Threads have not been loaded yet')
+            showToast('Threads have not been loaded yet', 'error')
             return
         }
 
         if (!threadTitle || !threadBody) {
-            alert('Please write a title and a body')
+            showToast('Please write a title and a body', 'error')
             return
         }
 
         try {
             if (!bee) throw new Error('Bee instance not available')
             await publishThread(bee, threadTitle, threadBody, threads[0] ?? NULL_ADDRESS, postBatchId)
-            alert('Your thread will be visible in the feed shortly')
+            showToast('Your thread will be visible in the feed shortly', 'success')
             setThreadTitle('')
             setThreadBody('')
             setShowThreadForm(false)
         } catch (error) {
             console.error(error)
-            alert('Failed to publish the thread, check console for more details')
+            showToast('Failed to publish the thread, check console for more details', 'error')
         }
     }
 

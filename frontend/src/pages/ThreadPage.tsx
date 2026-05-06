@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useBee } from '../App'
 import { useBatchId } from '../BatchContext'
+import { useToast } from '../ToastContext'
 import { Countdown } from '../components/Countdown'
 import { InputGroup } from '../components/InputGroup'
 import { Post } from '../components/Post'
@@ -17,6 +18,7 @@ import { ThreadMetadata } from '../Thread'
 export function ThreadPage() {
     const { bee } = useBee()
     const { postBatchId, imageBatchId } = useBatchId()
+    const { showToast } = useToast()
     const navigate = useNavigate()
     const { id } = useParams<{ id: string }>()
     const [threadData, setThreadData] = useState<ThreadMetadata | null>(null)
@@ -105,17 +107,17 @@ export function ThreadPage() {
 
     async function handleSubmit() {
         if (!posts) {
-            alert('Posts have not been loaded yet')
+            showToast('Posts have not been loaded yet', 'error')
             return
         }
 
         if (!newPostText && !selectedImage) {
-            alert('Please write a post or upload an image')
+            showToast('Please write a post or upload an image', 'error')
             return
         }
 
         if (!bee) {
-            alert('No Bee instance available')
+            showToast('No Bee instance available', 'error')
             navigate('/')
             return
         }
@@ -132,7 +134,7 @@ export function ThreadPage() {
                 imageBatchId
             )
 
-            alert('Your post will be visible in the feed shortly')
+            showToast('Your post will be visible in the feed shortly', 'success')
 
             setNewPostText('')
             setSelectedImage(null)
@@ -144,7 +146,7 @@ export function ThreadPage() {
             setShowPostForm(false)
         } catch (error) {
             console.error(error)
-            alert('Failed to publish the post, check console for more details')
+            showToast('Failed to publish the post, check console for more details', 'error')
         } finally {
             setUploading(false)
         }
