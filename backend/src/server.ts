@@ -8,18 +8,40 @@ import { log } from './logger'
 import { addPost, addThread, getPostTip, getThreadTip } from './memory'
 import { publishPosts } from './publisher'
 
+let connectedToBee = false
+
+export function isConnectedToBee(): boolean {
+    return connectedToBee
+}
+
 export async function runServer() {
     const key = await getConsensualPrivateKey()
     log(`Consensual private key for publishing messages: ${key.toHex()}`)
     log(`Ethereum address for reading feeds: ${new PrivateKey(MB_SIGNER).publicKey().address()}`)
-    bee.gsocSubscribe(key.publicKey().address(), NULL_ADDRESS, {
-        onMessage: message => {
-            safeHandleMessage(message)
-        },
-        onError: error => {
-            console.error(error)
-        }
-    })
+    subscribe(key.publicKey().address())
+}
+
+function subscribe(address: EthAddress) {
+    try {
+        bee.gsocSubscribe(address, NULL_ADDRESS, {
+            onMessage: message => {
+                safeHandleMessage(message)
+            },
+            onError: error => {
+                console.error(error)
+            },
+            onClose: () => {
+                connectedToBee = false
+                log('Connection to Bee closed, retrying in 5 seconds...')
+                setTimeout(() => subscribe(address), 5000)
+            }
+        })
+        connectedToBee = true
+    } catch (error) {
+        connectedToBee = false
+        log('Failed to connect to Bee, retrying in 5 seconds...')
+        setTimeout(() => subscribe(address), 5000)
+    }
 }
 
 async function safeHandleMessage(message: Bytes) {
