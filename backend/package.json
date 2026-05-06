@@ -10,7 +10,9 @@
     "license": "ISC",
     "dependencies": {
         "@ethersphere/bee-js": "^9.3.0",
-        "cafe-utility": "^27.12.1"
+        "@hono/node-server": "^2.0.1",
+        "cafe-utility": "^27.12.1",
+        "hono": "^4.12.17"
     },
     "devDependencies": {
         "@types/node": "^22.13.1",
