@@ -1,6 +1,6 @@
 # Context
 
--   This project is called "bchan", and it is hosted at https://beechan.eth.limo
+-   This project is called "bchan", and it is available at https://beechan.eth.limo
 -   This is the "backend" counterpart of the project
 
 ## Technology

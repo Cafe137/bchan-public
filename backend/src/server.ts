@@ -1,5 +1,6 @@
 import { Bytes, EthAddress, NULL_ADDRESS, PrivateKey, Reference, Signature } from '@ethersphere/bee-js'
 import { Binary, Dates, Types, Uint8ArrayReader } from 'cafe-utility'
+import { backupPost, backupThread } from './backup'
 import { bee } from './bee'
 import { getConsensualPrivateKey, MB_SIGNER, MB_STAMP } from './key'
 import { acquireLock, unlock } from './lock'
@@ -76,6 +77,7 @@ async function handlePost(reader: Uint8ArrayReader, message: Uint8Array) {
 
     const post = await bee.uploadData(MB_STAMP, message)
     addPost(new Reference(threadReference), post.reference)
+    backupPost(new Reference(threadReference), post.reference, message)
 
     await publishPosts()
 }
@@ -104,6 +106,7 @@ async function handleThread(reader: Uint8ArrayReader, message: Uint8Array) {
 
     const thread = await bee.uploadData(MB_STAMP, message)
     addThread(thread.reference)
+    backupThread(thread.reference, message)
 
     await publishPosts()
 }
