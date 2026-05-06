@@ -1,6 +1,6 @@
 import { Dates } from 'cafe-utility'
 
-export const WRITER = '0000000000000000000000000000000000000000000000000000000000000d08'
+export const WRITER = '00000000000000000000000000000000000000000000000000000000000016ca'
 
 export function getThreadIdentiferWord(thread: string) {
     const currentDaySegment = Math.floor((Math.floor(Date.now() / 1000) % 86400) / 675)
