@@ -34,6 +34,9 @@ export function ThreadPage() {
     const [uploading, setUploading] = useState<boolean>(false)
 
     useEffect(() => {
+        let cancelled = false
+        setThreadData(null)
+
         async function loadThread() {
             if (!id) {
                 console.error('No thread ID provided')
@@ -54,18 +57,23 @@ export function ThreadPage() {
                 const payload = new TextDecoder().decode(result.toUint8Array().slice(65 + 20 + 32))
                 const json = Types.asObject(JSON.parse(payload))
 
-                setThreadData({
-                    reference: id,
-                    title: Types.asString(json.title),
-                    body: Types.asString(json.body)
-                })
+                if (!cancelled) {
+                    setThreadData({
+                        reference: id,
+                        title: Types.asString(json.title),
+                        body: Types.asString(json.body)
+                    })
+                }
             } catch (error) {
                 console.error('Failed to load thread:', error)
-                navigate('/threads')
+                if (!cancelled) {
+                    navigate('/threads')
+                }
             }
         }
 
         loadThread()
+        return () => { cancelled = true }
     }, [id, bee, navigate])
 
     useEffect(() => {
@@ -98,7 +106,7 @@ export function ThreadPage() {
                 clearInterval(intervalId)
             }
         }
-    }, [threadData, bee, navigate])
+    }, [threadData, bee])
 
     async function handleSubmit() {
         if (!posts) {

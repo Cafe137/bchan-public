@@ -14,6 +14,7 @@ interface Props {
 }
 
 export function Post({ bee, reference }: Props) {
+    const refHex = reference.toHex()
     const [digest, setDigest] = useState<string | null>(null)
     const [signature, setSignature] = useState<string | null>(null)
     const [previous, setPrevious] = useState<string | null>(null)
@@ -27,7 +28,8 @@ export function Post({ bee, reference }: Props) {
 
     useEffect(() => {
         async function initialize() {
-            const result = await bee.downloadData(reference)
+            const ref = new Reference(refHex)
+            const result = await bee.downloadData(ref)
             setDigest(Binary.uint8ArrayToHex(result.toUint8Array().slice(65)))
             const reader = new Uint8ArrayReader(result.toUint8Array())
             setSignature(Binary.uint8ArrayToHex(reader.read(65)))
@@ -46,7 +48,7 @@ export function Post({ bee, reference }: Props) {
         }
 
         initialize()
-    }, [reference, bee])
+    }, [bee, refHex])
 
     useEffect(() => {
         if (!lightboxOpen) return
@@ -84,7 +86,7 @@ export function Post({ bee, reference }: Props) {
                     <ProofRow label="Previous" value={previous ?? ''} />
                     <ProofRow label="Thread" value={thread ?? ''} />
                     <ProofRow label="Timestamp" value={String(timestamp)} />
-                    <ProofRow label="Reference" value={reference.toHex()} />
+                    <ProofRow label="Reference" value={refHex} />
                     <ProofRow label="Digest" value={digest ?? ''} />
                 </Modal>
             )}

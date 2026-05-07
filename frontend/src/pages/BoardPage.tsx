@@ -36,6 +36,7 @@ export function BoardPage() {
     const [threadTitle, setThreadTitle] = useState<string>('')
     const [threadBody, setThreadBody] = useState<string>('')
     const [threads, setThreads] = useState<Reference[] | null>(null)
+    const threadsRef = useRef<Reference[] | null>(null)
     const [recentPosts, setRecentPosts] = useState<RecentPostItem[] | null>(null)
     const [showThreadForm, setShowThreadForm] = useState<boolean>(false)
     const titleInputRef = useRef<HTMLInputElement>(null)
@@ -52,7 +53,7 @@ export function BoardPage() {
             setNextRefreshAt(new Date(Date.now() + Dates.seconds(10)))
             if (bee) {
                 try {
-                    const feedReader = bee.makeFeedReader(
+                    const feedReader = currentBee.makeFeedReader(
                         Topic.fromString(getBoardIdentifierWord()),
                         'bc322a23377d4f71e7aa41d303b2391cb28c937c'
                     )
@@ -74,24 +75,30 @@ export function BoardPage() {
     }, [bee])
 
     useEffect(() => {
-        if (!bee || !threads) return
+        threadsRef.current = threads
+    }, [threads])
 
-        const nonNullThreads = threads.filter(t => !t.equals(NULL_ADDRESS))
-        let cancelled = false
+    useEffect(() => {
+        if (!bee) return
+        const currentBee = bee
 
         async function loadRecentPosts() {
+            const currentThreads = threadsRef.current
+            if (!currentThreads) return
+
+            const nonNullThreads = currentThreads.filter(t => !t.equals(NULL_ADDRESS))
             const allPosts: RecentPostItem[] = []
 
             await Promise.all(
                 nonNullThreads.map(async threadRef => {
                     try {
-                        const threadData = await bee!.downloadData(threadRef)
+                        const threadData = await currentBee.downloadData(threadRef)
                         const bytes = threadData.toUint8Array()
                         const threadPayload = new TextDecoder().decode(bytes.slice(117))
                         const threadJson = Types.asObject(JSON.parse(threadPayload))
                         const threadTitle = Types.asString(threadJson.title)
 
-                        const feedReader = bee!.makeFeedReader(
+                        const feedReader = currentBee.makeFeedReader(
                             Topic.fromString(getThreadIdentiferWord(threadRef.toHex())),
                             'bc322a23377d4f71e7aa41d303b2391cb28c937c'
                         )
@@ -103,7 +110,7 @@ export function BoardPage() {
                         await Promise.all(
                             postRefs.slice(0, 3).map(async postRef => {
                                 try {
-                                    const postData = await bee!.downloadData(postRef)
+                                    const postData = await currentBee.downloadData(postRef)
                                     const pb = postData.toUint8Array()
                                     const owner = Binary.uint8ArrayToHex(pb.slice(65, 85))
                                     const timestamp = Number(Binary.uint64ToNumber(pb.slice(149, 157), 'LE'))
@@ -113,7 +120,7 @@ export function BoardPage() {
                                         owner,
                                         timestamp,
                                         text: postJson.message ? Types.asString(postJson.message) : null,
-                                        image: postJson.image ? `${bee!.url}/bytes/${Types.asString(postJson.image)}` : null,
+                                        image: postJson.image ? `${currentBee.url}/bytes/${Types.asString(postJson.image)}` : null,
                                         threadReference: threadRef.toHex(),
                                         threadTitle
                                     })
@@ -128,14 +135,12 @@ export function BoardPage() {
                 })
             )
 
-            if (cancelled) return
             allPosts.sort((a, b) => b.timestamp - a.timestamp)
             setRecentPosts(allPosts.slice(0, 10))
         }
 
-        loadRecentPosts()
-        return () => { cancelled = true }
-    }, [bee, threads])
+        return System.runAndSetInterval(loadRecentPosts, Dates.seconds(30))
+    }, [bee])
 
     async function handleSubmit() {
         if (!threads) {

@@ -22,6 +22,7 @@ interface Props {
 
 export function Thread({ bee, reference }: Props) {
     const navigate = useNavigate()
+    const refHex = reference.toHex()
     const [payload, setPayload] = useState<ThreadMetadata | null>(null)
     const [digest, setDigest] = useState<string | null>(null)
     const [signature, setSignature] = useState<string | null>(null)
@@ -71,7 +72,8 @@ export function Thread({ bee, reference }: Props) {
 
     useEffect(() => {
         async function loadThreadData() {
-            const data = await bee.downloadData(reference)
+            const ref = new Reference(refHex)
+            const data = await bee.downloadData(ref)
             const reader = new Uint8ArrayReader(data.toUint8Array())
             setSignature(Binary.uint8ArrayToHex(reader.read(65)))
             setOwner(new EthAddress(reader.read(20)))
@@ -82,7 +84,7 @@ export function Thread({ bee, reference }: Props) {
 
             // Set payload immediately for faster rendering
             const threadData = {
-                reference: reference.toHex(),
+                reference: refHex,
                 title: Types.asString(json.title),
                 body: Types.asString(json.body)
             }
@@ -91,7 +93,7 @@ export function Thread({ bee, reference }: Props) {
             // Fetch post count asynchronously after basic thread data is displayed
             try {
                 const feedReader = bee.makeFeedReader(
-                    Topic.fromString(getThreadIdentiferWord(reference.toHex())),
+                    Topic.fromString(getThreadIdentiferWord(refHex)),
                     'bc322a23377d4f71e7aa41d303b2391cb28c937c'
                 )
                 const result = await feedReader.downloadPayload()
@@ -142,7 +144,7 @@ export function Thread({ bee, reference }: Props) {
         }
 
         loadThreadData()
-    }, [bee, reference])
+    }, [bee, refHex])
 
     function onOpen() {
         if (!payload) return
@@ -165,7 +167,7 @@ export function Thread({ bee, reference }: Props) {
                     <ProofRow label="Signature" value={signature ?? ''} />
                     <ProofRow label="Owner" value={owner.toHex()} />
                     <ProofRow label="Previous" value={previous ?? ''} />
-                    <ProofRow label="Reference" value={reference.toHex()} />
+                    <ProofRow label="Reference" value={refHex} />
                     <ProofRow label="Digest" value={digest ?? ''} />
                 </Modal>
             )}
