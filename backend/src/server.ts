@@ -99,7 +99,7 @@ async function handlePost(reader: Uint8ArrayReader, message: Uint8Array) {
     }
 
     const post = await bee.uploadData(MB_STAMP, message)
-    addPost(new Reference(threadReference), post.reference)
+    await addPost(new Reference(threadReference), post.reference)
     backupPost(new Reference(threadReference), post.reference, message)
 
     await publishThreadFeed(Binary.uint8ArrayToHex(threadReference))
@@ -128,7 +128,7 @@ async function handleThread(reader: Uint8ArrayReader, message: Uint8Array) {
     }
 
     const thread = await bee.uploadData(MB_STAMP, message)
-    addThread(thread.reference)
+    await addThread(thread.reference)
     backupThread(thread.reference, message)
 
     await publishThreadFeed(thread.reference.toHex())

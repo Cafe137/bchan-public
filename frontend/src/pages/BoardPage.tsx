@@ -53,7 +53,7 @@ export function BoardPage() {
             setNextRefreshAt(new Date(Date.now() + Dates.seconds(10)))
             if (bee) {
                 try {
-                    const feedReader = currentBee.makeFeedReader(
+                    const feedReader = bee.makeFeedReader(
                         Topic.fromString(getBoardIdentifierWord()),
                         'bc322a23377d4f71e7aa41d303b2391cb28c937c'
                     )
@@ -66,12 +66,7 @@ export function BoardPage() {
             }
         }
 
-        const intervalId = System.runAndSetInterval(initialize, Dates.seconds(10))
-        return () => {
-            if (typeof intervalId === 'number') {
-                clearInterval(intervalId)
-            }
-        }
+        return System.runAndSetInterval(initialize, Dates.seconds(10))
     }, [bee])
 
     useEffect(() => {

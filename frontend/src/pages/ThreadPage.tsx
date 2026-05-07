@@ -100,12 +100,7 @@ export function ThreadPage() {
             }
         }
 
-        const intervalId = System.runAndSetInterval(initialize, Dates.seconds(10))
-        return () => {
-            if (typeof intervalId === 'number') {
-                clearInterval(intervalId)
-            }
-        }
+        return System.runAndSetInterval(initialize, Dates.seconds(10))
     }, [threadData, bee])
 
     async function handleSubmit() {

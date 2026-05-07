@@ -1,7 +1,14 @@
 import { Reference } from '@ethersphere/bee-js'
 import { Arrays, Binary } from 'cafe-utility'
-import { existsSync, readFileSync, writeFileSync } from 'fs'
+import { existsSync, readFileSync } from 'fs'
+import { rename, writeFile } from 'fs/promises'
 import { getCurrentIdentifierWord } from './shared'
+
+async function writeAtomic(path: string, data: string): Promise<void> {
+    const tmp = `${path}.tmp`
+    await writeFile(tmp, data, 'utf-8')
+    await rename(tmp, path)
+}
 
 export const threads: string[] = existsSync('threads.json') ? JSON.parse(readFileSync('threads.json', 'utf-8')) : []
 export const posts: Record<string, string[]> = existsSync('posts.json')
@@ -32,7 +39,7 @@ export function getPostTip(thread: string): Uint8Array {
     return Binary.hexToUint8Array(posts[thread][0])
 }
 
-export function addThread(reference: Reference) {
+export async function addThread(reference: Reference) {
     Arrays.unshiftAndLimit(threads, reference.toHex(), 128)
     posts[reference.toHex()] = []
     for (const key of Object.keys(posts)) {
@@ -40,16 +47,16 @@ export function addThread(reference: Reference) {
             delete posts[key]
         }
     }
-    writeFileSync('threads.json', JSON.stringify(threads))
-    writeFileSync('posts.json', JSON.stringify(posts))
+    await writeAtomic('threads.json', JSON.stringify(threads))
+    await writeAtomic('posts.json', JSON.stringify(posts))
 }
 
-export function addPost(thread: Reference, post: Reference) {
+export async function addPost(thread: Reference, post: Reference) {
     if (!posts[thread.toHex()]) {
         throw Error('Thread not found')
     }
     Arrays.unshiftAndLimit(posts[thread.toHex()], post.toHex(), 128)
-    writeFileSync('posts.json', JSON.stringify(posts))
+    await writeAtomic('posts.json', JSON.stringify(posts))
 }
 
 export function marshalThreads(): Uint8Array {

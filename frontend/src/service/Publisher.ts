@@ -1,5 +1,6 @@
 import { Bee, NULL_ADDRESS, NULL_IDENTIFIER, Reference } from '@ethersphere/bee-js'
 import { Binary } from 'cafe-utility'
+import { DEFAULT_POST_BATCH_ID } from '../BatchContext'
 import { WRITER } from '../Consensus'
 import { getIdentityFromStorage } from '../IdentityContext'
 
@@ -19,7 +20,7 @@ export async function publishThread(
         currentBatchId ||
         localStorage.getItem('postBatchId') ||
         localStorage.getItem('batchId') ||
-        'b961413232c96eedae48947a71c99e454e51c4b5bf93a77c59f958af1229a932'
+        DEFAULT_POST_BATCH_ID
 
     const pieces = Binary.concatBytes(
         identity.publicKey().address().toUint8Array(),
@@ -55,7 +56,7 @@ export async function publishPost(
         currentBatchId ||
         localStorage.getItem('postBatchId') ||
         localStorage.getItem('batchId') ||
-        'b961413232c96eedae48947a71c99e454e51c4b5bf93a77c59f958af1229a932'
+        DEFAULT_POST_BATCH_ID
     // Get imageBatchId from localStorage if not provided directly
     const imageBatchId = currentImageBatchId || localStorage.getItem('imageBatchId') || postBatchId
 
