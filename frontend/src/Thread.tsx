@@ -33,22 +33,10 @@ export function Thread({ bee, reference }: Props) {
 
     // Always define useMemo for activity styling, even if not used yet
     const activityStyle = useMemo(() => {
-        if (!lastPostTime) return { borderStyle: {}, colorClass: '', ageText: '', color: '' }
+        if (!lastPostTime) return { borderStyle: {}, colorClass: '', color: '' }
 
         const now = Date.now()
         const ageInHours = (now - lastPostTime) / (1000 * 60 * 60)
-        const ageInMinutes = (now - lastPostTime) / (1000 * 60)
-        const ageInDays = ageInHours / 24
-
-        // Format age text
-        let ageText = ''
-        if (ageInMinutes < 60) {
-            ageText = `${Math.floor(ageInMinutes)} minute${Math.floor(ageInMinutes) !== 1 ? 's' : ''} ago`
-        } else if (ageInHours < 24) {
-            ageText = `${Math.floor(ageInHours)} hour${Math.floor(ageInHours) !== 1 ? 's' : ''} ago`
-        } else {
-            ageText = `${Math.floor(ageInDays)} day${Math.floor(ageInDays) !== 1 ? 's' : ''} ago`
-        }
 
         // Color coding based on post age - simplified to 3 variants
         let borderStyle = {}
@@ -78,7 +66,7 @@ export function Thread({ bee, reference }: Props) {
             color = '#3399ff'
         }
 
-        return { borderStyle, colorClass, ageText, color }
+        return { borderStyle, colorClass, color }
     }, [lastPostTime])
 
     useEffect(() => {
@@ -172,39 +160,42 @@ export function Thread({ bee, reference }: Props) {
 
     return (
         <>
-        {showProofModal && owner && (
-            <Modal title="Proof" onClose={() => setShowProofModal(false)}>
-                <ProofRow label="Signature" value={signature ?? ''} />
-                <ProofRow label="Owner" value={owner.toHex()} />
-                <ProofRow label="Previous" value={previous ?? ''} />
-                <ProofRow label="Reference" value={reference.toHex()} />
-                <ProofRow label="Digest" value={digest ?? ''} />
-            </Modal>
-        )}
-        <div className="thread" style={activityStyle.borderStyle} onClick={onOpen}>
-            <h2>{payload.title}</h2>
-            <p className="thread-subtitle">{payload.body.slice(0, 120)}</p>
-            <div className="thread-info">
-                <span className="post-count">
-                    {postCount !== null ? `${postCount} post${postCount !== 1 ? 's' : ''}` : '...'}
-                </span>
-                {lastPostTime && (
-                    <span className="timestamp" title={`Last post ${Dates.getTimeDelta(lastPostTime).toLowerCase()} ago`}>
-                        {`${Dates.getTimeDelta(lastPostTime).toLowerCase()} ago`}
+            {showProofModal && owner && (
+                <Modal title="Proof" onClose={() => setShowProofModal(false)}>
+                    <ProofRow label="Signature" value={signature ?? ''} />
+                    <ProofRow label="Owner" value={owner.toHex()} />
+                    <ProofRow label="Previous" value={previous ?? ''} />
+                    <ProofRow label="Reference" value={reference.toHex()} />
+                    <ProofRow label="Digest" value={digest ?? ''} />
+                </Modal>
+            )}
+            <div className="thread" style={activityStyle.borderStyle} onClick={onOpen}>
+                <h2>{payload.title}</h2>
+                <p className="thread-subtitle">{payload.body.slice(0, 120)}</p>
+                <div className="thread-info">
+                    <span className="post-count">
+                        {postCount !== null ? `${postCount} post${postCount !== 1 ? 's' : ''}` : '...'}
                     </span>
-                )}
-                <p
-                    className="proof-button"
-                    style={{ marginLeft: 'auto' }}
-                    onClick={e => {
-                        e.stopPropagation()
-                        showProof()
-                    }}
-                >
-                    Proof
-                </p>
+                    {lastPostTime && (
+                        <span
+                            className="timestamp"
+                            title={`Last post ${Dates.getTimeDelta(lastPostTime).toLowerCase()} ago`}
+                        >
+                            {`${Dates.getTimeDelta(lastPostTime).toLowerCase()} ago`}
+                        </span>
+                    )}
+                    <p
+                        className="proof-button"
+                        style={{ marginLeft: 'auto' }}
+                        onClick={e => {
+                            e.stopPropagation()
+                            showProof()
+                        }}
+                    >
+                        Proof
+                    </p>
+                </div>
             </div>
-        </div>
         </>
     )
 }

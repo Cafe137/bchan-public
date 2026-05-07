@@ -87,7 +87,7 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
         if (!identity) {
             regenerateIdentity()
         }
-    }, [identity])
+    }, [identity, regenerateIdentity])
 
     return (
         <IdentityContext.Provider

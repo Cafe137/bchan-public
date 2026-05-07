@@ -41,6 +41,7 @@ export function addThread(reference: Reference) {
         }
     }
     writeFileSync('threads.json', JSON.stringify(threads))
+    writeFileSync('posts.json', JSON.stringify(posts))
 }
 
 export function addPost(thread: Reference, post: Reference) {

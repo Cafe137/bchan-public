@@ -46,7 +46,7 @@ export function Post({ bee, reference }: Props) {
         }
 
         initialize()
-    }, [reference])
+    }, [reference, bee])
 
     useEffect(() => {
         if (!lightboxOpen) return

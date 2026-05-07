@@ -6,7 +6,7 @@ import { getConsensualPrivateKey, MB_SIGNER, MB_STAMP } from './key'
 import { acquireLock, unlock } from './lock'
 import { log } from './logger'
 import { addPost, addThread, getPostTip, getThreadTip } from './memory'
-import { publishPosts } from './publisher'
+import { publishBoardFeed, publishThreadFeed } from './publisher'
 
 let connectedToBee = false
 
@@ -86,7 +86,8 @@ async function handlePost(reader: Uint8ArrayReader, message: Uint8Array) {
     }
 
     const timestamp = Binary.uint64ToNumber(timestampBytes, 'LE')
-    if (timestamp > Date.now() || timestamp < Date.now() - Dates.minutes(1)) {
+    const now = Date.now()
+    if (timestamp > now || timestamp < now - Dates.minutes(1)) {
         throw Error('Invalid timestamp')
     }
 
@@ -101,7 +102,7 @@ async function handlePost(reader: Uint8ArrayReader, message: Uint8Array) {
     addPost(new Reference(threadReference), post.reference)
     backupPost(new Reference(threadReference), post.reference, message)
 
-    await publishPosts()
+    await publishThreadFeed(Binary.uint8ArrayToHex(threadReference))
 }
 
 async function handleThread(reader: Uint8ArrayReader, message: Uint8Array) {
@@ -130,5 +131,6 @@ async function handleThread(reader: Uint8ArrayReader, message: Uint8Array) {
     addThread(thread.reference)
     backupThread(thread.reference, message)
 
-    await publishPosts()
+    await publishThreadFeed(thread.reference.toHex())
+    await publishBoardFeed()
 }
