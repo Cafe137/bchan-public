@@ -1,11 +1,13 @@
+import { identicon } from '@dicebear/collection'
+import { createAvatar } from '@dicebear/core'
 import { NULL_ADDRESS, Reference, Topic } from '@ethersphere/bee-js'
-import { Binary, Dates, System } from 'cafe-utility'
+import { Binary, Dates, System, Types } from 'cafe-utility'
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useBee } from '../App'
 import { useBatchId } from '../BatchContext'
 import { useToast } from '../ToastContext'
-import { getBoardIdentifierWord } from '../Consensus'
+import { getBoardIdentifierWord, getThreadIdentiferWord } from '../Consensus'
 import { Thread } from '../Thread'
 import { Countdown } from '../components/Countdown'
 import { InputGroup } from '../components/InputGroup'
@@ -13,6 +15,16 @@ import { Section } from '../components/Section'
 import { Spinner } from '../components/Spinner'
 import { MainLayout } from '../layouts/MainLayout'
 import { publishThread } from '../service/Publisher'
+
+type RecentPostItem = {
+    reference: string
+    owner: string
+    timestamp: number
+    text: string | null
+    image: string | null
+    threadReference: string
+    threadTitle: string
+}
 
 export function BoardPage() {
     const { bee } = useBee()
@@ -24,6 +36,7 @@ export function BoardPage() {
     const [threadTitle, setThreadTitle] = useState<string>('')
     const [threadBody, setThreadBody] = useState<string>('')
     const [threads, setThreads] = useState<Reference[] | null>(null)
+    const [recentPosts, setRecentPosts] = useState<RecentPostItem[] | null>(null)
     const [showThreadForm, setShowThreadForm] = useState<boolean>(false)
     const titleInputRef = useRef<HTMLInputElement>(null)
 
@@ -59,6 +72,70 @@ export function BoardPage() {
             }
         }
     }, [bee])
+
+    useEffect(() => {
+        if (!bee || !threads) return
+
+        const nonNullThreads = threads.filter(t => !t.equals(NULL_ADDRESS))
+        let cancelled = false
+
+        async function loadRecentPosts() {
+            const allPosts: RecentPostItem[] = []
+
+            await Promise.all(
+                nonNullThreads.map(async threadRef => {
+                    try {
+                        const threadData = await bee!.downloadData(threadRef)
+                        const bytes = threadData.toUint8Array()
+                        const threadPayload = new TextDecoder().decode(bytes.slice(117))
+                        const threadJson = Types.asObject(JSON.parse(threadPayload))
+                        const threadTitle = Types.asString(threadJson.title)
+
+                        const feedReader = bee!.makeFeedReader(
+                            Topic.fromString(getThreadIdentiferWord(threadRef.toHex())),
+                            'bc322a23377d4f71e7aa41d303b2391cb28c937c'
+                        )
+                        const result = await feedReader.downloadPayload()
+                        const postRefs = Binary.partition(result.payload.toUint8Array(), 32)
+                            .map(x => new Reference(x))
+                            .filter(x => !x.equals(NULL_ADDRESS))
+
+                        await Promise.all(
+                            postRefs.slice(0, 3).map(async postRef => {
+                                try {
+                                    const postData = await bee!.downloadData(postRef)
+                                    const pb = postData.toUint8Array()
+                                    const owner = Binary.uint8ArrayToHex(pb.slice(65, 85))
+                                    const timestamp = Number(Binary.uint64ToNumber(pb.slice(149, 157), 'LE'))
+                                    const postJson = Types.asObject(JSON.parse(new TextDecoder().decode(pb.slice(157))))
+                                    allPosts.push({
+                                        reference: postRef.toHex(),
+                                        owner,
+                                        timestamp,
+                                        text: postJson.message ? Types.asString(postJson.message) : null,
+                                        image: postJson.image ? `${bee!.url}/bytes/${Types.asString(postJson.image)}` : null,
+                                        threadReference: threadRef.toHex(),
+                                        threadTitle
+                                    })
+                                } catch {
+                                    // skip posts that fail to load
+                                }
+                            })
+                        )
+                    } catch {
+                        // skip threads that fail to load
+                    }
+                })
+            )
+
+            if (cancelled) return
+            allPosts.sort((a, b) => b.timestamp - a.timestamp)
+            setRecentPosts(allPosts.slice(0, 10))
+        }
+
+        loadRecentPosts()
+        return () => { cancelled = true }
+    }, [bee, threads])
 
     async function handleSubmit() {
         if (!threads) {
@@ -121,6 +198,46 @@ export function BoardPage() {
                     <button onClick={handleSubmit}>Submit</button>
                 </Section>
             )}
+            <section>
+                <div className="section-title">Recent Posts</div>
+                {recentPosts === null ? (
+                    <div className="section-body"><Spinner /></div>
+                ) : recentPosts.length === 0 ? (
+                    <div className="section-body"><p>No posts yet.</p></div>
+                ) : (
+                    <div className="recent-posts-list">
+                        {recentPosts.map(post => (
+                            <div
+                                key={post.reference}
+                                className="recent-post-item"
+                                onClick={() => navigate(`/thread/${post.threadReference}`)}
+                            >
+                                <img
+                                    src={createAvatar(identicon, { seed: post.owner }).toDataUri()}
+                                    className="recent-post-avatar"
+                                    width={32}
+                                    height={32}
+                                />
+                                <div className="recent-post-content">
+                                    <div className="recent-post-meta">
+                                        <span className="recent-post-thread">{post.threadTitle}</span>
+                                        <span className="timestamp">
+                                            {post.owner.slice(0, 8)} · {Dates.getTimeDelta(post.timestamp).toLowerCase()} ago
+                                        </span>
+                                    </div>
+                                    {post.image ? (
+                                        <img src={post.image} className="recent-post-image" />
+                                    ) : post.text ? (
+                                        <p className="recent-post-text">
+                                            {post.text.length > 120 ? post.text.slice(0, 120) + '…' : post.text}
+                                        </p>
+                                    ) : null}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </section>
             <div className="thread-container">
                 {threads ? (
                     threads.length > 0 ? (

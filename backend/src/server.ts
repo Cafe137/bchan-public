@@ -70,7 +70,7 @@ async function handlePost(reader: Uint8ArrayReader, message: Uint8Array) {
     const owner = new EthAddress(reader.read(20))
     const previousHash = reader.read(32)
     const threadReference = reader.read(32)
-    const timestampBytes = reader.read(64)
+    const timestampBytes = reader.read(8)
 
     const publicKey = signature.recoverPublicKey(message.slice(65))
     if (!Binary.equals(publicKey.address().toUint8Array(), owner.toUint8Array())) {

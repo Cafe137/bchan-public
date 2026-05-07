@@ -3,10 +3,10 @@ import { createAvatar } from '@dicebear/core'
 import { Bee, EthAddress, Reference } from '@ethersphere/bee-js'
 import { Binary, Types, Uint8ArrayReader } from 'cafe-utility'
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Horizontal } from './Horizontal'
 import { Modal, ProofRow } from './Modal'
 import { Spinner } from './Spinner'
-import { createPortal } from 'react-dom'
 
 interface Props {
     bee: Bee
@@ -34,7 +34,7 @@ export function Post({ bee, reference }: Props) {
             setOwner(new EthAddress(reader.read(20)))
             setPrevious(Binary.uint8ArrayToHex(reader.read(32)))
             setThread(Binary.uint8ArrayToHex(reader.read(32)))
-            setTimestamp(Binary.uint64ToNumber(reader.read(64), 'LE'))
+            setTimestamp(Binary.uint64ToNumber(reader.read(8), 'LE'))
             const payload = new TextDecoder().decode(result.toUint8Array().slice(65 + 32 + 32 + 20 + 8))
             const json = Types.asObject(JSON.parse(payload))
             if (json.message) {
@@ -77,84 +77,86 @@ export function Post({ bee, reference }: Props) {
 
     return (
         <>
-        {showProofModal && owner && (
-            <Modal title="Proof" onClose={() => setShowProofModal(false)}>
-                <ProofRow label="Signature" value={signature ?? ''} />
-                <ProofRow label="Owner" value={owner.toHex()} />
-                <ProofRow label="Previous" value={previous ?? ''} />
-                <ProofRow label="Thread" value={thread ?? ''} />
-                <ProofRow label="Timestamp" value={String(timestamp)} />
-                <ProofRow label="Reference" value={reference.toHex()} />
-                <ProofRow label="Digest" value={digest ?? ''} />
-            </Modal>
-        )}
-        <div className="post">
-            <Horizontal top>
-                <div style={{ flexShrink: 0 }}>
-                    <img src={avatar.toDataUri()} className="avatar" width={40} />
-                </div>
-                <div style={{ width: '100%', overflow: 'hidden' }}>
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: '8px',
-                            alignItems: 'center'
-                        }}
-                    >
-                        <p
+            {showProofModal && owner && (
+                <Modal title="Proof" onClose={() => setShowProofModal(false)}>
+                    <ProofRow label="Signature" value={signature ?? ''} />
+                    <ProofRow label="Owner" value={owner.toHex()} />
+                    <ProofRow label="Previous" value={previous ?? ''} />
+                    <ProofRow label="Thread" value={thread ?? ''} />
+                    <ProofRow label="Timestamp" value={String(timestamp)} />
+                    <ProofRow label="Reference" value={reference.toHex()} />
+                    <ProofRow label="Digest" value={digest ?? ''} />
+                </Modal>
+            )}
+            <div className="post">
+                <Horizontal top>
+                    <div style={{ flexShrink: 0 }}>
+                        <img src={avatar.toDataUri()} className="avatar" width={40} />
+                    </div>
+                    <div style={{ width: '100%', overflow: 'hidden' }}>
+                        <div
                             style={{
-                                marginRight: '8px',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis'
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '8px',
+                                alignItems: 'center'
                             }}
                         >
-                            <strong>{owner.toHex().slice(0, 8)}</strong>
-                        </p>
-                        <p
-                            className="proof-button"
-                            onClick={showProof}
-                            style={{
-                                whiteSpace: 'nowrap',
-                                marginRight: '8px'
-                            }}
-                        >
-                            Proof
-                        </p>
-                        {timestamp && (
                             <p
-                                className="timestamp"
                                 style={{
-                                    whiteSpace: 'normal',
-                                    wordBreak: 'normal',
-                                    hyphens: 'auto'
+                                    marginRight: '8px',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
                                 }}
                             >
-                                <strong>{new Date(Number(timestamp)).toLocaleString()}</strong>
+                                <strong>{owner.toHex().slice(0, 8)}</strong>
                             </p>
-                        )}
-                    </div>
-                    {text &&
-                        text.split('\n').map((line, index) => (
                             <p
-                                className={line.startsWith('>') ? 'greentext' : undefined}
-                                key={index}
-                                style={{ wordBreak: 'break-word' }}
+                                className="proof-button"
+                                onClick={showProof}
+                                style={{
+                                    whiteSpace: 'nowrap',
+                                    marginRight: '8px'
+                                }}
                             >
-                                {line}
+                                Proof
                             </p>
-                        ))}
-                    {image && <img onClick={onImageClick} src={image} style={{ cursor: 'zoom-in' }} />}
-                </div>
-            </Horizontal>
-            {lightboxOpen && image && createPortal(
-                <div className="lightbox" onClick={() => setLightboxOpen(false)}>
-                    <img src={image} alt="" onClick={e => e.stopPropagation()} />
-                </div>,
-                document.body
-            )}
-        </div>
+                            {timestamp && (
+                                <p
+                                    className="timestamp"
+                                    style={{
+                                        whiteSpace: 'normal',
+                                        wordBreak: 'normal',
+                                        hyphens: 'auto'
+                                    }}
+                                >
+                                    <strong>{new Date(Number(timestamp)).toLocaleString()}</strong>
+                                </p>
+                            )}
+                        </div>
+                        {text &&
+                            text.split('\n').map((line, index) => (
+                                <p
+                                    className={line.startsWith('>') ? 'greentext' : undefined}
+                                    key={index}
+                                    style={{ wordBreak: 'break-word' }}
+                                >
+                                    {line}
+                                </p>
+                            ))}
+                        {image && <img onClick={onImageClick} src={image} style={{ cursor: 'zoom-in' }} />}
+                    </div>
+                </Horizontal>
+                {lightboxOpen &&
+                    image &&
+                    createPortal(
+                        <div className="lightbox" onClick={() => setLightboxOpen(false)}>
+                            <img src={image} alt="" onClick={e => e.stopPropagation()} />
+                        </div>,
+                        document.body
+                    )}
+            </div>
         </>
     )
 }

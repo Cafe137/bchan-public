@@ -1,10 +1,9 @@
 import { NULL_ADDRESS, Reference, Topic } from '@ethersphere/bee-js'
-import { Binary, Dates, System, Types, Uint8ArrayReader } from 'cafe-utility'
+import { Binary, Dates, System, Types } from 'cafe-utility'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useBee } from '../App'
 import { useBatchId } from '../BatchContext'
-import { useToast } from '../ToastContext'
 import { Countdown } from '../components/Countdown'
 import { InputGroup } from '../components/InputGroup'
 import { Post } from '../components/Post'
@@ -14,6 +13,7 @@ import { getThreadIdentiferWord } from '../Consensus'
 import { MainLayout } from '../layouts/MainLayout'
 import { publishPost } from '../service/Publisher'
 import { ThreadMetadata } from '../Thread'
+import { useToast } from '../ToastContext'
 
 export function ThreadPage() {
     const { bee } = useBee()
@@ -50,11 +50,6 @@ export function ThreadPage() {
             try {
                 const reference = new Reference(id)
                 const result = await bee.downloadData(reference)
-                const reader = new Uint8ArrayReader(new Uint8Array(result.toUint8Array()))
-                reader.read(65) // Skip signature
-                reader.read(20) // Skip owner
-                reader.read(32) // Skip previous
-                reader.read(64) // Skip timestamp
 
                 const payload = new TextDecoder().decode(result.toUint8Array().slice(65 + 20 + 32))
                 const json = Types.asObject(JSON.parse(payload))
@@ -244,11 +239,7 @@ export function ThreadPage() {
             </Section>
 
             {posts && !posts.length ? <p>Be the first to post here!</p> : null}
-            {posts && bee ? (
-                posts.map(post => <Post key={post.toHex()} bee={bee} reference={post} />)
-            ) : (
-                <Spinner />
-            )}
+            {posts && bee ? posts.map(post => <Post key={post.toHex()} bee={bee} reference={post} />) : <Spinner />}
             <Countdown target={nextRefreshAt} prefix="Refreshing in" />
         </MainLayout>
     )

@@ -575,6 +575,70 @@
                 from { opacity: 0; transform: translateY(8px); }
                 to { opacity: 1; transform: translateY(0); }
             }
+            .recent-posts-list {
+                display: flex;
+                flex-direction: column;
+            }
+            .recent-post-item {
+                padding: 10px 16px;
+                cursor: pointer;
+                border-bottom: 1px solid #21262d;
+                display: flex;
+                flex-direction: row;
+                gap: 10px;
+                align-items: flex-start;
+                transition: background-color 0.15s;
+            }
+            .recent-post-item:last-child {
+                border-bottom: none;
+            }
+            .recent-post-item:hover {
+                background-color: #262d36;
+            }
+            .recent-post-avatar {
+                flex-shrink: 0;
+                border-radius: 4px;
+            }
+            .recent-post-content {
+                flex: 1;
+                min-width: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+            .recent-post-meta {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            .recent-post-thread {
+                font-size: 13px;
+                font-weight: 600;
+                color: #e06800;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 200px;
+            }
+            .recent-post-text {
+                font-size: 13px;
+                color: #8b949e;
+                line-height: 1.4;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin: 0;
+            }
+            .recent-post-image {
+                width: 64px;
+                height: 64px;
+                max-width: 64px;
+                max-height: 64px;
+                object-fit: cover;
+                border-radius: 4px;
+                cursor: default;
+            }
         </style>
     </head>
     <body>
