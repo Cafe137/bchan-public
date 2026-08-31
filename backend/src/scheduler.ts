@@ -3,7 +3,7 @@ import { acquireLock, unlock } from './lock'
 import { log } from './logger'
 import { needsNewIdentifierWord, updateIdentifierWord } from './memory'
 import { publishAllFeeds } from './publisher'
-import { getCurrentIdentifierWord } from './shared'
+import { getCurrentIdentifierWord } from './topics'
 
 export function runScheduler() {
     System.forever(

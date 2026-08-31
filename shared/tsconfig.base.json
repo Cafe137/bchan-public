@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "rootDir": "src",
+        "lib": ["ES2022"],
+        "target": "ES2022",
+        "strict": true,
+        "noUnusedLocals": true,
+        "forceConsistentCasingInFileNames": true
+    },
+    "include": ["src"]
+}

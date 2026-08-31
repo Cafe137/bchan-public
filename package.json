@@ -1,0 +1,8 @@
+{
+    "name": "bchan",
+    "workspaces": [
+        "shared",
+        "backend",
+        "frontend"
+    ]
+}

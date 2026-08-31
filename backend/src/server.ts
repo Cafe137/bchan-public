@@ -3,6 +3,7 @@ import { Binary, Dates, Types, Uint8ArrayReader } from 'cafe-utility'
 import { backupPost, backupThread } from './backup'
 import { bee } from './bee'
 import { getConsensualPrivateKey, MB_SIGNER, MB_STAMP } from './key'
+import { MB_ADDRESS } from '@bchan/shared'
 import { acquireLock, unlock } from './lock'
 import { log } from './logger'
 import { addPost, addThread, getPostTip, getThreadTip } from './memory'
@@ -17,7 +18,11 @@ export function isConnectedToBee(): boolean {
 export async function runServer() {
     const key = await getConsensualPrivateKey()
     log(`Consensual private key for publishing messages: ${key.toHex()}`)
-    log(`Ethereum address for reading feeds: ${new PrivateKey(MB_SIGNER).publicKey().address()}`)
+    const feedAddress = new PrivateKey(MB_SIGNER).publicKey().address()
+    if (feedAddress.toHex() !== MB_ADDRESS) {
+        throw Error(`MB_SIGNER publishes as ${feedAddress.toHex()}, but clients read ${MB_ADDRESS}`)
+    }
+    log(`Ethereum address for reading feeds: ${feedAddress}`)
     subscribe(key.publicKey().address())
 }
 

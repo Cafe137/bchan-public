@@ -1,10 +1,10 @@
-import { Bee, EthAddress, NULL_ADDRESS, Reference, Topic } from '@ethersphere/bee-js'
+import { Bee, EthAddress, NULL_ADDRESS, Reference } from '@ethersphere/bee-js'
 import { Binary, Dates, Types, Uint8ArrayReader } from 'cafe-utility'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Modal, ProofRow } from './components/Modal'
 import { Spinner } from './components/Spinner'
-import { getThreadIdentiferWord } from './Consensus'
+import { MB_OWNER, PERIOD_LENGTH, getThreadTopic } from './Consensus'
 
 export type ThreadMetadata = {
     reference: string
@@ -92,9 +92,10 @@ export function Thread({ bee, reference }: Props) {
 
             // Fetch post count asynchronously after basic thread data is displayed
             try {
-                const feedReader = bee.feed.makeReader(
-                    Topic.fromString(getThreadIdentiferWord(refHex)),
-                    'bc322a23377d4f71e7aa41d303b2391cb28c937c'
+                const feedReader = bee.rollingFeed.makeReader(
+                    getThreadTopic(refHex),
+                    MB_OWNER,
+                    PERIOD_LENGTH
                 )
                 const result = await feedReader.downloadPayload()
                 const posts = Binary.partition(result.payload.toUint8Array(), 32)

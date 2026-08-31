@@ -2,7 +2,7 @@ import { Reference } from '@ethersphere/bee-js'
 import { Arrays, Binary } from 'cafe-utility'
 import { existsSync, readFileSync } from 'fs'
 import { rename, writeFile } from 'fs/promises'
-import { getCurrentIdentifierWord } from './shared'
+import { getCurrentIdentifierWord } from './topics'
 
 async function writeAtomic(path: string, data: string): Promise<void> {
     const tmp = `${path}.tmp`

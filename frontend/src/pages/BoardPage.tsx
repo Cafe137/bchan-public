@@ -1,13 +1,13 @@
 import { identicon } from '@dicebear/collection'
 import { createAvatar } from '@dicebear/core'
-import { NULL_ADDRESS, Reference, Topic } from '@ethersphere/bee-js'
+import { NULL_ADDRESS, Reference } from '@ethersphere/bee-js'
 import { Binary, Dates, System, Types } from 'cafe-utility'
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useBee } from '../App'
 import { useBatchId } from '../BatchContext'
 import { useToast } from '../ToastContext'
-import { getBoardIdentifierWord, getThreadIdentiferWord } from '../Consensus'
+import { MB_OWNER, PERIOD_LENGTH, getBoardTopic, getThreadTopic } from '../Consensus'
 import { Thread } from '../Thread'
 import { Countdown } from '../components/Countdown'
 import { InputGroup } from '../components/InputGroup'
@@ -53,10 +53,7 @@ export function BoardPage() {
             setNextRefreshAt(new Date(Date.now() + Dates.seconds(10)))
             if (bee) {
                 try {
-                    const feedReader = bee.feed.makeReader(
-                        Topic.fromString(getBoardIdentifierWord()),
-                        'bc322a23377d4f71e7aa41d303b2391cb28c937c'
-                    )
+                    const feedReader = bee.rollingFeed.makeReader(getBoardTopic(), MB_OWNER, PERIOD_LENGTH)
                     const result = await feedReader.downloadPayload()
                     setThreads(Binary.partition(result.payload.toUint8Array(), 32).map(x => new Reference(x)))
                 } catch (error) {
@@ -93,9 +90,10 @@ export function BoardPage() {
                         const threadJson = Types.asObject(JSON.parse(threadPayload))
                         const threadTitle = Types.asString(threadJson.title)
 
-                        const feedReader = currentBee.feed.makeReader(
-                            Topic.fromString(getThreadIdentiferWord(threadRef.toHex())),
-                            'bc322a23377d4f71e7aa41d303b2391cb28c937c'
+                        const feedReader = currentBee.rollingFeed.makeReader(
+                            getThreadTopic(threadRef.toHex()),
+                            MB_OWNER,
+                            PERIOD_LENGTH
                         )
                         const result = await feedReader.downloadPayload()
                         const postRefs = Binary.partition(result.payload.toUint8Array(), 32)
