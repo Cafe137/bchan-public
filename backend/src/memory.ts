@@ -2,7 +2,6 @@ import { Reference } from '@ethersphere/bee-js'
 import { Arrays, Binary } from 'cafe-utility'
 import { existsSync, readFileSync } from 'fs'
 import { rename, writeFile } from 'fs/promises'
-import { getCurrentIdentifierWord } from './topics'
 
 async function writeAtomic(path: string, data: string): Promise<void> {
     const tmp = `${path}.tmp`
@@ -19,8 +18,6 @@ for (const thread of threads) {
         posts[thread] = []
     }
 }
-
-let lastIdentifierWord = ''
 
 export function getThreadTip() {
     if (threads.length === 0) {
@@ -76,16 +73,4 @@ export function marshalPosts(thread: string): Uint8Array {
         data.set(Binary.hexToUint8Array(posts[thread][i]), i * 32)
     }
     return data
-}
-
-export function needsNewIdentifierWord() {
-    const currentIdentifierWord = getCurrentIdentifierWord()
-    if (currentIdentifierWord !== lastIdentifierWord) {
-        return true
-    }
-    return false
-}
-
-export function updateIdentifierWord(word: string) {
-    lastIdentifierWord = word
 }
