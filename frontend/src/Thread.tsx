@@ -73,7 +73,7 @@ export function Thread({ bee, reference }: Props) {
     useEffect(() => {
         async function loadThreadData() {
             const ref = new Reference(refHex)
-            const data = await bee.downloadData(ref)
+            const data = await bee.data.download(ref)
             const reader = new Uint8ArrayReader(data.toUint8Array())
             setSignature(Binary.uint8ArrayToHex(reader.read(65)))
             setOwner(new EthAddress(reader.read(20)))
@@ -92,7 +92,7 @@ export function Thread({ bee, reference }: Props) {
 
             // Fetch post count asynchronously after basic thread data is displayed
             try {
-                const feedReader = bee.makeFeedReader(
+                const feedReader = bee.feed.makeReader(
                     Topic.fromString(getThreadIdentiferWord(refHex)),
                     'bc322a23377d4f71e7aa41d303b2391cb28c937c'
                 )
@@ -108,7 +108,7 @@ export function Thread({ bee, reference }: Props) {
                 if (posts.length > 0) {
                     try {
                         const mostRecentPostRef = posts[0]
-                        const postData = await bee.downloadData(mostRecentPostRef)
+                        const postData = await bee.data.download(mostRecentPostRef)
                         const postReader = new Uint8ArrayReader(postData.toUint8Array())
                         postReader.read(65) // Skip signature
                         postReader.read(20) // Skip owner

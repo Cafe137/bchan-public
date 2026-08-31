@@ -6,23 +6,23 @@ import { marshalPosts, marshalThreads, threads } from './memory'
 import { getCurrentIdentifierWord } from './shared'
 
 export async function publishThreadFeed(thread: string) {
-    log(`Publishing thread ${thread}...`)
-    const feedWriter = bee.makeFeedWriter(Topic.fromString(getCurrentIdentifierWord() + thread), MB_SIGNER)
-    await feedWriter.uploadPayload(MB_STAMP, marshalPosts(thread))
-    log('Published successfully')
+  log(`Publishing thread ${thread}...`)
+  const feedWriter = bee.feed.makeWriter(Topic.fromString(getCurrentIdentifierWord() + thread), MB_SIGNER)
+  await feedWriter.uploadPayload(MB_STAMP, marshalPosts(thread))
+  log('Published successfully')
 }
 
 export async function publishBoardFeed() {
-    log('Publishing board...')
-    const feedWriter = bee.makeFeedWriter(Topic.fromString(getCurrentIdentifierWord()), MB_SIGNER)
-    await feedWriter.uploadPayload(MB_STAMP, marshalThreads())
-    log('Published successfully')
+  log('Publishing board...')
+  const feedWriter = bee.feed.makeWriter(Topic.fromString(getCurrentIdentifierWord()), MB_SIGNER)
+  await feedWriter.uploadPayload(MB_STAMP, marshalThreads())
+  log('Published successfully')
 }
 
 export async function publishAllFeeds() {
-    log('Publishing all feeds...')
-    for (const thread of threads) {
-        await publishThreadFeed(thread)
-    }
-    await publishBoardFeed()
+  log('Publishing all feeds...')
+  for (const thread of threads) {
+    await publishThreadFeed(thread)
+  }
+  await publishBoardFeed()
 }

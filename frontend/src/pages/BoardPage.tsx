@@ -53,7 +53,7 @@ export function BoardPage() {
             setNextRefreshAt(new Date(Date.now() + Dates.seconds(10)))
             if (bee) {
                 try {
-                    const feedReader = bee.makeFeedReader(
+                    const feedReader = bee.feed.makeReader(
                         Topic.fromString(getBoardIdentifierWord()),
                         'bc322a23377d4f71e7aa41d303b2391cb28c937c'
                     )
@@ -87,13 +87,13 @@ export function BoardPage() {
             await Promise.all(
                 nonNullThreads.map(async threadRef => {
                     try {
-                        const threadData = await currentBee.downloadData(threadRef)
+                        const threadData = await currentBee.data.download(threadRef)
                         const bytes = threadData.toUint8Array()
                         const threadPayload = new TextDecoder().decode(bytes.slice(117))
                         const threadJson = Types.asObject(JSON.parse(threadPayload))
                         const threadTitle = Types.asString(threadJson.title)
 
-                        const feedReader = currentBee.makeFeedReader(
+                        const feedReader = currentBee.feed.makeReader(
                             Topic.fromString(getThreadIdentiferWord(threadRef.toHex())),
                             'bc322a23377d4f71e7aa41d303b2391cb28c937c'
                         )
@@ -105,7 +105,7 @@ export function BoardPage() {
                         await Promise.all(
                             postRefs.slice(0, 3).map(async postRef => {
                                 try {
-                                    const postData = await currentBee.downloadData(postRef)
+                                    const postData = await currentBee.data.download(postRef)
                                     const pb = postData.toUint8Array()
                                     const owner = Binary.uint8ArrayToHex(pb.slice(65, 85))
                                     const timestamp = Number(Binary.uint64ToNumber(pb.slice(149, 157), 'LE'))

@@ -30,7 +30,7 @@ export async function publishThread(
 
     const signature = identity.sign(pieces)
 
-    await bee.gsocSend(
+    await bee.messaging.gsocSend(
         postBatchId,
         WRITER,
         NULL_ADDRESS,
@@ -66,7 +66,7 @@ export async function publishPost(
     if (imageFile) {
         try {
             const fileData = await imageFile.arrayBuffer()
-            const uploadResult = await bee.uploadData(imageBatchId, new Uint8Array(fileData))
+            const uploadResult = await bee.data.upload(imageBatchId, new Uint8Array(fileData))
             imageReference = uploadResult.reference.toHex()
         } catch (error) {
             console.error('Failed to upload image:', error)
@@ -85,7 +85,7 @@ export async function publishPost(
     )
     const signature = identity.sign(pieces)
 
-    await bee.gsocSend(
+    await bee.messaging.gsocSend(
         postBatchId,
         WRITER,
         NULL_IDENTIFIER,

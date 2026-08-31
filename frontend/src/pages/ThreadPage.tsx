@@ -52,7 +52,7 @@ export function ThreadPage() {
 
             try {
                 const reference = new Reference(id)
-                const result = await bee.downloadData(reference)
+                const result = await bee.data.download(reference)
 
                 const payload = new TextDecoder().decode(result.toUint8Array().slice(65 + 20 + 32))
                 const json = Types.asObject(JSON.parse(payload))
@@ -84,7 +84,7 @@ export function ThreadPage() {
             try {
                 if (!bee || !threadData) return
 
-                const feedReader = bee.makeFeedReader(
+                const feedReader = bee.feed.makeReader(
                     Topic.fromString(getThreadIdentiferWord(threadData.reference)),
                     'bc322a23377d4f71e7aa41d303b2391cb28c937c'
                 )

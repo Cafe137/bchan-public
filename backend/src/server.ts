@@ -23,7 +23,7 @@ export async function runServer() {
 
 function subscribe(address: EthAddress) {
     try {
-        bee.gsocSubscribe(address, NULL_ADDRESS, {
+        bee.messaging.gsocSubscribe(address, NULL_ADDRESS, {
             onMessage: message => {
                 safeHandleMessage(message)
             },
@@ -98,7 +98,7 @@ async function handlePost(reader: Uint8ArrayReader, message: Uint8Array) {
         throw Error('Empty post')
     }
 
-    const post = await bee.uploadData(MB_STAMP, message)
+    const post = await bee.data.upload(MB_STAMP, message)
     await addPost(new Reference(threadReference), post.reference)
     backupPost(new Reference(threadReference), post.reference, message)
 
@@ -127,7 +127,7 @@ async function handleThread(reader: Uint8ArrayReader, message: Uint8Array) {
         throw Error('Invalid thread')
     }
 
-    const thread = await bee.uploadData(MB_STAMP, message)
+    const thread = await bee.data.upload(MB_STAMP, message)
     await addThread(thread.reference)
     backupThread(thread.reference, message)
 
