@@ -15,7 +15,7 @@
         "@bchan/shared": "*",
         "@dicebear/collection": "^9.2.2",
         "@dicebear/core": "^9.2.2",
-        "@ethersphere/bee-js": "npm:@upcoming/bee-js@^13.1.3",
+        "@ethersphere/bee-js": "npm:@upcoming/bee-js@^13.1.4",
         "cafe-utility": "^27.14.1",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",

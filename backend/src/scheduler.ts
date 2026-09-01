@@ -1,5 +1,4 @@
 import { Dates, System } from 'cafe-utility'
-import { acquireLock, unlock } from './lock'
 import { log } from './logger'
 import { syncAllFeeds } from './publisher'
 import { getCurrentPeriod } from './topics'
@@ -14,14 +13,9 @@ export function runScheduler() {
                 return
             }
             log(`Period ${period} started, checking feeds...`)
-            await acquireLock()
-            try {
-                await syncAllFeeds()
-                // Set last, so a partial failure retries on the next tick.
-                lastSyncedPeriod = period
-            } finally {
-                unlock()
-            }
+            await syncAllFeeds()
+            // Set last, so a partial failure retries on the next tick.
+            lastSyncedPeriod = period
         },
         Dates.seconds(5),
         console.log

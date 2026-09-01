@@ -1,9 +1,13 @@
 import { PrivateKey, RollingFeedWriter } from '@ethersphere/bee-js'
+import { Arrays } from 'cafe-utility'
 import { bee } from './bee'
 import { MB_SIGNER, MB_STAMP } from './key'
+import { acquireLock, unlock } from './lock'
 import { log } from './logger'
 import { marshalPosts, marshalThreads, threads } from './memory'
 import { PERIOD_LENGTH, getBoardTopic, getThreadTopic } from './topics'
+
+const SYNC_CONCURRENCY = 8
 
 const signer = new PrivateKey(MB_SIGNER)
 
@@ -27,22 +31,37 @@ export async function publishBoardFeed(): Promise<void> {
   log('Published successfully')
 }
 
-async function syncFeed(name: string, writer: RollingFeedWriter, payload: Uint8Array): Promise<void> {
+async function syncFeed(name: string, writer: RollingFeedWriter, payload: () => Uint8Array): Promise<void> {
   if (await writer.isCaughtUp()) {
     return
   }
-  log(`Feed ${name} fell behind, republishing and backfilling...`)
-  await Promise.all([
-    writer.uploadPayload(MB_STAMP, payload),
-    // Throws on a first-ever publish, when there is no earlier period to copy forward.
-    writer.catchUp(MB_STAMP).catch(error => log(`Nothing to backfill for ${name}: ${error}`))
-  ])
-  log(`Feed ${name} is up to date`)
+  await acquireLock()
+  try {
+    // A message may have published this feed while we waited.
+    if (await writer.isCaughtUp()) {
+      return
+    }
+    log(`Feed ${name} fell behind, republishing and backfilling...`)
+    await Promise.all([
+      writer.uploadPayload(MB_STAMP, payload()),
+      // Throws on a first-ever publish, when there is no earlier period to copy forward.
+      writer.catchUp(MB_STAMP).catch(error => log(`Nothing to backfill for ${name}: ${error}`))
+    ])
+    log(`Feed ${name} is up to date`)
+  } finally {
+    unlock()
+  }
 }
 
 export async function syncAllFeeds(): Promise<void> {
-  for (const thread of threads) {
-    await syncFeed(`thread ${thread}`, threadWriter(thread), marshalPosts(thread))
+  const feeds = threads.map(thread => ({
+    name: `thread ${thread}`,
+    writer: threadWriter(thread),
+    payload: () => marshalPosts(thread)
+  }))
+  feeds.push({ name: 'board', writer: boardWriter(), payload: () => marshalThreads() })
+
+  for (const batch of Arrays.splitBySize(feeds, SYNC_CONCURRENCY)) {
+    await Promise.all(batch.map(feed => syncFeed(feed.name, feed.writer, feed.payload)))
   }
-  await syncFeed('board', boardWriter(), marshalThreads())
 }
