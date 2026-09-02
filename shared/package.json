@@ -2,24 +2,15 @@
     "name": "@bchan/shared",
     "version": "1.0.0",
     "description": "Protocol constants shared by the bchan backend and frontend",
-    "type": "module",
-    "main": "dist/cjs/index.js",
-    "module": "dist/esm/index.js",
-    "types": "dist/esm/index.d.ts",
-    "exports": {
-        ".": {
-            "types": "./dist/esm/index.d.ts",
-            "import": "./dist/esm/index.js",
-            "require": "./dist/cjs/index.js"
-        }
-    },
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "files": [
         "dist"
     ],
     "scripts": {
-        "build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && cp cjs-package.json dist/cjs/package.json",
-        "prepare": "npm run build",
-        "check": "tsc -p tsconfig.esm.json --noEmit"
+        "build": "tsc",
+        "prepare": "tsc",
+        "check": "tsc --noEmit"
     },
     "devDependencies": {
         "typescript": "^5.8.3"

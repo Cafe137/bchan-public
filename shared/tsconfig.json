@@ -1,8 +1,12 @@
 {
     "compilerOptions": {
+        "outDir": "dist",
         "rootDir": "src",
         "lib": ["ES2022"],
+        "module": "CommonJS",
         "target": "ES2022",
+        "moduleResolution": "node",
+        "declaration": true,
         "strict": true,
         "noUnusedLocals": true,
         "forceConsistentCasingInFileNames": true
