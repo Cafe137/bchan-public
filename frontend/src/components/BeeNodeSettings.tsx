@@ -30,7 +30,7 @@ export function BeeNodeSettings() {
         setConnectionStatus('checking')
         try {
             const testBee = new Bee(urlToCheck)
-            await testBee.checkConnection()
+            await testBee.connectivity.checkConnection()
             setConnectionStatus('connected')
             return true
         } catch (err) {

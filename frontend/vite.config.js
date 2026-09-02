@@ -1,5 +1,8 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-    base: './'
+    base: './',
+    build: {
+        commonjsOptions: { include: [/node_modules/, /shared/] }
+    }
 })

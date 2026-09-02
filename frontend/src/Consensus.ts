@@ -1,13 +1,16 @@
-import { Dates } from 'cafe-utility'
+import { BOARD_TOPIC, MB_ADDRESS, threadTopic } from '@bchan/shared'
+import { EthAddress, Topic } from '@ethersphere/bee-js'
+
+export { PERIOD_LENGTH } from '@bchan/shared'
 
 export const WRITER = '00000000000000000000000000000000000000000000000000000000000016ca'
 
-export function getThreadIdentiferWord(thread: string) {
-    const currentDaySegment = Math.floor((Math.floor(Date.now() / 1000) % 86400) / 675)
-    return `${Dates.isoDate()}/${currentDaySegment}${thread}`
+export const MB_OWNER = new EthAddress(MB_ADDRESS)
+
+export function getBoardTopic() {
+    return Topic.fromString(BOARD_TOPIC)
 }
 
-export function getBoardIdentifierWord() {
-    const currentDaySegment = Math.floor((Math.floor(Date.now() / 1000) % 86400) / 675)
-    return `${Dates.isoDate()}/${currentDaySegment}`
+export function getThreadTopic(thread: string) {
+    return Topic.fromString(threadTopic(thread))
 }

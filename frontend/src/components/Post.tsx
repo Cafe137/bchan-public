@@ -29,7 +29,7 @@ export function Post({ bee, reference }: Props) {
     useEffect(() => {
         async function initialize() {
             const ref = new Reference(refHex)
-            const result = await bee.downloadData(ref)
+            const result = await bee.data.download(ref)
             setDigest(Binary.uint8ArrayToHex(result.toUint8Array().slice(65)))
             const reader = new Uint8ArrayReader(result.toUint8Array())
             setSignature(Binary.uint8ArrayToHex(reader.read(65)))

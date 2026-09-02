@@ -1,0 +1,19 @@
+{
+    "name": "@bchan/shared",
+    "version": "1.0.0",
+    "description": "Protocol constants shared by the bchan backend and frontend",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "prepare": "tsc",
+        "check": "tsc --noEmit"
+    },
+    "devDependencies": {
+        "typescript": "^5.8.3"
+    },
+    "license": "ISC"
+}

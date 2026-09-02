@@ -1,13 +1,13 @@
 import { identicon } from '@dicebear/collection'
 import { createAvatar } from '@dicebear/core'
-import { NULL_ADDRESS, Reference, Topic } from '@ethersphere/bee-js'
+import { NULL_ADDRESS, Reference } from '@ethersphere/bee-js'
 import { Binary, Dates, System, Types } from 'cafe-utility'
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useBee } from '../App'
 import { useBatchId } from '../BatchContext'
 import { useToast } from '../ToastContext'
-import { getBoardIdentifierWord, getThreadIdentiferWord } from '../Consensus'
+import { MB_OWNER, PERIOD_LENGTH, getBoardTopic, getThreadTopic } from '../Consensus'
 import { Thread } from '../Thread'
 import { Countdown } from '../components/Countdown'
 import { InputGroup } from '../components/InputGroup'
@@ -53,10 +53,7 @@ export function BoardPage() {
             setNextRefreshAt(new Date(Date.now() + Dates.seconds(10)))
             if (bee) {
                 try {
-                    const feedReader = bee.makeFeedReader(
-                        Topic.fromString(getBoardIdentifierWord()),
-                        'bc322a23377d4f71e7aa41d303b2391cb28c937c'
-                    )
+                    const feedReader = bee.rollingFeed.makeReader(getBoardTopic(), MB_OWNER, PERIOD_LENGTH)
                     const result = await feedReader.downloadPayload()
                     setThreads(Binary.partition(result.payload.toUint8Array(), 32).map(x => new Reference(x)))
                 } catch (error) {
@@ -87,15 +84,16 @@ export function BoardPage() {
             await Promise.all(
                 nonNullThreads.map(async threadRef => {
                     try {
-                        const threadData = await currentBee.downloadData(threadRef)
+                        const threadData = await currentBee.data.download(threadRef)
                         const bytes = threadData.toUint8Array()
                         const threadPayload = new TextDecoder().decode(bytes.slice(117))
                         const threadJson = Types.asObject(JSON.parse(threadPayload))
                         const threadTitle = Types.asString(threadJson.title)
 
-                        const feedReader = currentBee.makeFeedReader(
-                            Topic.fromString(getThreadIdentiferWord(threadRef.toHex())),
-                            'bc322a23377d4f71e7aa41d303b2391cb28c937c'
+                        const feedReader = currentBee.rollingFeed.makeReader(
+                            getThreadTopic(threadRef.toHex()),
+                            MB_OWNER,
+                            PERIOD_LENGTH
                         )
                         const result = await feedReader.downloadPayload()
                         const postRefs = Binary.partition(result.payload.toUint8Array(), 32)
@@ -105,7 +103,7 @@ export function BoardPage() {
                         await Promise.all(
                             postRefs.slice(0, 3).map(async postRef => {
                                 try {
-                                    const postData = await currentBee.downloadData(postRef)
+                                    const postData = await currentBee.data.download(postRef)
                                     const pb = postData.toUint8Array()
                                     const owner = Binary.uint8ArrayToHex(pb.slice(65, 85))
                                     const timestamp = Number(Binary.uint64ToNumber(pb.slice(149, 157), 'LE'))

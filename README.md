@@ -131,7 +131,7 @@ After processing a message the backend republishes two Swarm feeds, both signed 
 
 | Property | Value |
 |----------|-------|
-| Topic    | `{YYYY-MM-DD}/{segment}` (see time segmentation below) |
+| Topic    | rolling feed over base topic `bchan/board` (see rolling feeds below) |
 | Signer   | `bc322a23377d4f71e7aa41d303b2391cb28c937c` |
 | Payload  | 4096 bytes — up to 128 × 32-byte Swarm references, newest first |
 
@@ -139,7 +139,7 @@ After processing a message the backend republishes two Swarm feeds, both signed 
 
 | Property | Value |
 |----------|-------|
-| Topic    | `{YYYY-MM-DD}/{segment}{threadReferenceHex}` |
+| Topic    | rolling feed over base topic `bchan/thread/{threadReferenceHex}` |
 | Signer   | `bc322a23377d4f71e7aa41d303b2391cb28c937c` |
 | Payload  | 4096 bytes — up to 128 × 32-byte Swarm references, newest first |
 
@@ -159,19 +159,37 @@ Both feeds hold at most 128 references. Older entries are dropped when the limit
 
 ---
 
-## Time Segmentation
+## Rolling Feeds
 
-Swarm feeds are sequential: a reader must walk the update chain from the beginning to find the latest version. As a feed accumulates updates, lookup time grows linearly with the number of updates. Feed topics are therefore rotated every segment — each rotation starts a fresh chain, bounding lookup time to the number of updates within a single segment.
+Swarm feeds are sequential: a reader must walk the update chain from the beginning to find the latest version. As a feed accumulates updates, lookup time grows linearly with the number of updates. Feed topics are therefore rotated every period — each rotation starts a fresh chain, bounding lookup time to the number of updates within a single period.
 
-The day (UTC) is divided into **128 segments** of **675 seconds** each (~11 minutes 15 seconds).
+Rotation is handled by bee-js's rolling feed (`bee.rollingFeed`). Both sides derive the same topic from a period-independent base topic and the current period index:
 
 ```
-segment = floor( (unix_timestamp_seconds % 86400) / 675 )
-topic   = "{YYYY-MM-DD}/{segment}"            // board feed
-topic   = "{YYYY-MM-DD}/{segment}{threadHex}" // thread feed
+period = floor( unix_timestamp_seconds / 675 )
+topic  = keccak256( baseTopic || uint64_be(period) )
 ```
 
-When the segment changes the backend immediately republishes all feeds under the new topic so clients find the current data.
+The period is **675 seconds** (~11 minutes 15 seconds). Since 86400 / 675 = 128, there are 128 periods per day and every period boundary falls on a UTC day boundary.
+
+Base topics, the period length and the signer address live in the `shared` workspace package, which both the backend and the frontend import. A mismatch between the two sides does not raise an error — it derives a topic nobody publishes to, and the board renders empty.
+
+### Writing
+
+Every publish writes the payload to **both** the current period and the next one. The next period is therefore already populated when rotation happens, so an active feed needs no work at the boundary.
+
+### Reading
+
+A reader reads the current period, and falls back to the previous period once if it is empty, which absorbs clock skew between writer and reader.
+
+### Silence
+
+Mirroring forward only covers one period, so a writer that goes quiet for two consecutive periods leaves a gap. Once per period the backend checks each feed and, if it has fallen behind:
+
+1. republishes the current payload to the live period (the heartbeat — only a normal publish may write the live period), and
+2. backfills every period strictly between the last populated one and the live one by copying the last known chunk forward.
+
+Both run concurrently; their period ranges are disjoint. Backfill is best effort — it has nothing to copy on a first-ever publish.
 
 ---
 
@@ -208,8 +226,8 @@ Frontend                   GSOC                  Backend sidecar         Swarm
    |                         |                         |<- Swarm ref ------  |
    |                         |                         |-- publishFeed ---> |
    |                         |                         |                    |
-   |<-- feedReader.read() ---------------------------------------- feed -- |
-   |<-- downloadData(ref) ---------------------------------------- data -- |
+   |<-- rollingFeed.downloadPayload() ---------------------------- feed -- |
+   |<-- data.download(ref) --------------------------------------- data -- |
 ```
 
 ---

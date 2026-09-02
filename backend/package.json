@@ -3,19 +3,23 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
+        "build": "tsc",
+        "start": "tsx src/index.ts",
         "check": "tsc --noEmit"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@ethersphere/bee-js": "^12.1.0",
+        "@bchan/shared": "*",
+        "@ethersphere/bee-js": "npm:@upcoming/bee-js@^13.1.4",
         "@hono/node-server": "^2.0.1",
         "cafe-utility": "^27.12.1",
         "hono": "^4.12.17"
     },
     "devDependencies": {
         "@types/node": "^22.13.1",
+        "tsx": "^4.23.13",
         "typescript": "^5.8.3"
     },
     "description": ""
