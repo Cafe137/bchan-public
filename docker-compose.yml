@@ -1,0 +1,49 @@
+name: bchan
+
+services:
+    bee:
+        image: ethersphere/bee:2.8.2
+        command: start
+        restart: unless-stopped
+        environment:
+            BEE_API_ADDR: :1633
+            BEE_DATA_DIR: /home/bee/.bee
+            BEE_PASSWORD: ${BEE_PASSWORD:?set BEE_PASSWORD in .env}
+            BEE_BLOCKCHAIN_RPC_ENDPOINT: ${BEE_BLOCKCHAIN_RPC_ENDPOINT:?set BEE_BLOCKCHAIN_RPC_ENDPOINT in .env}
+            BEE_FULL_NODE: 'true'
+            BEE_SWAP_ENABLE: 'true'
+            BEE_WELCOME_MESSAGE: bchan service node
+            BEE_NAT_ADDR: ${BEE_NAT_ADDR:-}
+            BEE_CORS_ALLOWED_ORIGINS: ${BEE_CORS_ALLOWED_ORIGINS:-}
+        volumes:
+            - bee-data:/home/bee/.bee
+        ports:
+            - '127.0.0.1:${BEE_API_PORT:-1633}:1633'
+            - '${BEE_P2P_PORT:-1634}:1634'
+        healthcheck:
+            test:
+                - CMD-SHELL
+                - 'bash -c ''exec 3<>/dev/tcp/127.0.0.1/1633; printf "GET /health HTTP/1.0\r\n\r\n" >&3; grep -q ok <&3'''
+            interval: 15s
+            timeout: 5s
+            retries: 40
+            start_period: 60s
+
+    backend:
+        build:
+            context: .
+            dockerfile: backend/Dockerfile
+        restart: unless-stopped
+        depends_on:
+            bee:
+                condition: service_healthy
+        environment:
+            BEE_URL: http://bee:1633
+            MB_SIGNER: ${MB_SIGNER:?set MB_SIGNER in .env}
+            MB_STAMP: ${MB_STAMP:?set MB_STAMP in .env}
+        volumes:
+            - backend-backup:/app/backend/backup
+
+volumes:
+    bee-data:
+    backend-backup:

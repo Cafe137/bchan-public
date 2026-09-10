@@ -5,8 +5,7 @@ import { Horizontal } from './Horizontal'
 import { InputGroup } from './InputGroup'
 import { Section } from './Section'
 
-// Default Bee node URL
-export const DEFAULT_BEE_URL = 'https://bzz.limo'
+export const DEFAULT_BEE_URL = import.meta.env.VITE_BEE_URL || 'https://bzz.limo'
 
 export function BeeNodeSettings() {
     const { bee, setBee } = useBee()
