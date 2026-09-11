@@ -12,7 +12,7 @@
     "license": "ISC",
     "dependencies": {
         "@bchan/shared": "*",
-        "@ethersphere/bee-js": "npm:@upcoming/bee-js@^13.1.4",
+        "@ethersphere/bee-js": "^13.1.0",
         "@hono/node-server": "^2.0.1",
         "cafe-utility": "^27.12.1",
         "hono": "^4.12.17"
