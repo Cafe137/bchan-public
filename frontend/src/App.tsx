@@ -81,7 +81,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
             if (!bee) return false
 
             try {
-                await bee.checkConnection()
+                await bee.connectivity.checkConnection()
                 return true
             } catch (err) {
                 console.error('Bee connection check failed:', err)

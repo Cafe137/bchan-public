@@ -5,8 +5,7 @@ import { Horizontal } from './Horizontal'
 import { InputGroup } from './InputGroup'
 import { Section } from './Section'
 
-// Default Bee node URL
-export const DEFAULT_BEE_URL = 'https://bzz.limo'
+export const DEFAULT_BEE_URL = import.meta.env.VITE_BEE_URL || 'https://bzz.limo'
 
 export function BeeNodeSettings() {
     const { bee, setBee } = useBee()
@@ -30,7 +29,7 @@ export function BeeNodeSettings() {
         setConnectionStatus('checking')
         try {
             const testBee = new Bee(urlToCheck)
-            await testBee.checkConnection()
+            await testBee.connectivity.checkConnection()
             setConnectionStatus('connected')
             return true
         } catch (err) {

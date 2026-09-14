@@ -1,0 +1,39 @@
+name: bchan
+
+services:
+    backend:
+        build:
+            context: .
+            dockerfile: backend/Dockerfile
+        restart: unless-stopped
+        environment:
+            BEE_URL: http://bee:1633
+            HEALTH_PORT: ${HEALTH_PORT:-3000}
+            MB_SIGNER: ${MB_SIGNER:?set MB_SIGNER in .env}
+            MB_STAMP: ${MB_STAMP:?set MB_STAMP in .env}
+        # threads.json, posts.json and backup/ are all resolved relative to the
+        # working directory, so moving it puts every mutable file on one volume.
+        working_dir: /data
+        command: ["node", "/app/backend/dist/index.js"]
+        volumes:
+            - backend-state:/data
+        networks:
+            - swarm
+        healthcheck:
+            test:
+                - CMD
+                - node
+                - -e
+                - "fetch('http://127.0.0.1:'+(process.env.HEALTH_PORT||3000)+'/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+            interval: 30s
+            timeout: 5s
+            retries: 3
+            start_period: 20s
+
+volumes:
+    backend-state:
+
+networks:
+    # Shared with the bee-services and swarm-gateway projects.
+    swarm:
+        external: true

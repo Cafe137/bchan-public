@@ -33,7 +33,7 @@ export function HomePage() {
         try {
             const bee = new Bee(url)
             // Validate connection by making a simple API call
-            await bee.checkConnection()
+            await bee.connectivity.checkConnection()
             setBee(bee)
             navigate('/threads')
         } catch (err) {

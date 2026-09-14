@@ -7,7 +7,7 @@ export const MB_SIGNER = Types.asString(process.env.MB_SIGNER, { name: 'MB_SIGNE
 export const MB_STAMP = Types.asString(process.env.MB_STAMP, { name: 'MB_STAMP' })
 
 export async function getConsensualPrivateKey(): Promise<PrivateKey> {
-    const addresses = await bee.getNodeAddresses()
-    log('Mining GSOC signer...')
-    return bee.gsocMine(addresses.overlay, NULL_IDENTIFIER)
+  const addresses = await bee.connectivity.getNodeAddresses()
+  log('Mining GSOC signer...')
+  return bee.messaging.gsocMine(addresses.overlay, NULL_IDENTIFIER)
 }
